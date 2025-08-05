@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import OnboardingPage from './pages/OnboardingPage';
 import ListeningPage from './pages/ListeningPage';
@@ -22,6 +22,30 @@ function Navbar() {
 }
 
 function App() {
+  useEffect(() => {
+    // Global error handlers
+    const handleUnhandledRejection = (event) => {
+      console.error('Unhandled promise rejection:', event.reason);
+      console.error('Promise:', event.promise);
+      // Prevent the default behavior (which would log to console)
+      event.preventDefault();
+    };
+
+    const handleError = (event) => {
+      console.error('Global error caught:', event.error);
+    };
+
+    // Add event listeners
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    window.addEventListener('error', handleError);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
+
   return (
     <BrowserRouter>
       <Navbar />

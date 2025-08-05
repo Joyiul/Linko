@@ -25,14 +25,29 @@ export default function ListeningPage() {
       const formData = new FormData();
       formData.append("file", file);
       
+      console.log("Uploading file:", file.name);
+      
       // Call the complete pipeline endpoint
       const response = await axios.post("http://localhost:5001/upload-and-analyze", formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        timeout: 60000, // 60 second timeout
       });
       
+      console.log("Response received:", response.status);
+      
+      if (!response.data) {
+        throw new Error("Empty response from server");
+      }
+      
       const data = response.data;
+      
+      // Validate response structure
+      if (!data.transcript || !data.analysis) {
+        throw new Error("Invalid response structure from server");
+      }
+      
       setTranscript(data.transcript);
       setResults({
         transcript: data.transcript,
@@ -42,19 +57,36 @@ export default function ListeningPage() {
       });
 
       // Save results for analysis page
-      localStorage.setItem("analysisResults", JSON.stringify({
+      const resultData = {
         transcript: data.transcript,
         tone: data.analysis.tone,
         slang: data.analysis.slang,
         filename: data.filename
-      }));
+      };
       
-      // Navigate to results
-      navigate("/analyze");
+      localStorage.setItem("analysisResults", JSON.stringify(resultData));
+      console.log("Results saved to localStorage");
+      
+      // Small delay before navigation to ensure state is set
+      setTimeout(() => {
+        navigate("/analyze");
+      }, 100);
       
     } catch (err) {
-      console.error("Error:", err);
-      setError(err.response?.data?.error || "An error occurred processing your file");
+      console.error("Upload and analyze error:", err);
+      let errorMessage = "An error occurred processing your file";
+      
+      if (err.code === 'ECONNABORTED') {
+        errorMessage = "Request timed out. Please try with a smaller file.";
+      } else if (err.response) {
+        errorMessage = err.response.data?.error || `Server error: ${err.response.status}`;
+      } else if (err.request) {
+        errorMessage = "Cannot connect to server. Please check if the backend is running.";
+      } else {
+        errorMessage = err.message || errorMessage;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -71,22 +103,52 @@ export default function ListeningPage() {
     setError("");
     
     try {
+      console.log("Analyzing text:", transcript.substring(0, 50) + "...");
+      
       const res = await axios.post("http://localhost:5001/analyze", {
         transcript,
+      }, {
+        timeout: 30000, // 30 second timeout
       });
+      
+      console.log("Analysis response received:", res.status);
+      
+      if (!res.data) {
+        throw new Error("Empty response from server");
+      }
+      
       setResults(res.data);
 
       // Save results for analysis page
-      localStorage.setItem("analysisResults", JSON.stringify({
+      const resultData = {
         transcript: transcript,
         tone: res.data.tone,
         slang: res.data.slang
-      }));
-      navigate("/analyze");
+      };
+      
+      localStorage.setItem("analysisResults", JSON.stringify(resultData));
+      console.log("Manual analysis results saved to localStorage");
+      
+      // Small delay before navigation
+      setTimeout(() => {
+        navigate("/analyze");
+      }, 100);
       
     } catch (err) {
-      console.error("Error:", err);
-      setError("An error occurred analyzing your text");
+      console.error("Manual analyze error:", err);
+      let errorMessage = "An error occurred analyzing your text";
+      
+      if (err.code === 'ECONNABORTED') {
+        errorMessage = "Request timed out. Please try again.";
+      } else if (err.response) {
+        errorMessage = err.response.data?.error || `Server error: ${err.response.status}`;
+      } else if (err.request) {
+        errorMessage = "Cannot connect to server. Please check if the backend is running.";
+      } else {
+        errorMessage = err.message || errorMessage;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

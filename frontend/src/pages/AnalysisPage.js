@@ -7,8 +7,20 @@ export default function AnalysisPage() {
   const [results, setResults] = useState(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem("analysisResults");
-    if (stored) setResults(JSON.parse(stored));
+    try {
+      const stored = localStorage.getItem("analysisResults");
+      if (stored) {
+        const parsedResults = JSON.parse(stored);
+        console.log("Loaded analysis results from localStorage:", parsedResults);
+        setResults(parsedResults);
+      } else {
+        console.log("No analysis results found in localStorage");
+      }
+    } catch (error) {
+      console.error("Error loading analysis results from localStorage:", error);
+      // Clear corrupted data
+      localStorage.removeItem("analysisResults");
+    }
   }, []);
 
   if (!results) return (

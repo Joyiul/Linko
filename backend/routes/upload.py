@@ -7,7 +7,8 @@ from processing.slang_detect import detect_slang
 
 upload_routes = Blueprint('upload_routes', __name__)
 
-UPLOAD_FOLDER = 'backend/uploads'
+# Use absolute path for uploads folder
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'uploads')
 ALLOWED_EXTENSIONS = {'wav', 'mp3', 'mp4', 'avi', 'mov', 'flac', 'm4a', 'ogg'}
 
 def allowed_file(filename):
@@ -25,6 +26,9 @@ def upload_file():
     
     if not allowed_file(file.filename):
         return jsonify({'error': 'File type not allowed. Supported: wav, mp3, mp4, avi, mov, flac, m4a, ogg'}), 400
+    
+    # Ensure uploads directory exists
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     
     filename = secure_filename(file.filename)
     filepath = os.path.join(UPLOAD_FOLDER, filename)
@@ -44,6 +48,9 @@ def upload_and_analyze():
     
     if not allowed_file(file.filename):
         return jsonify({'error': 'File type not allowed. Supported: wav, mp3, mp4, avi, mov, flac, m4a, ogg'}), 400
+    
+    # Ensure uploads directory exists
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     
     # Save file
     filename = secure_filename(file.filename)
