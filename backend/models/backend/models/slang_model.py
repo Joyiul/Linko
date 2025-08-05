@@ -11,9 +11,9 @@ from tensorflow import keras
 
 df = pd.read_csv('backend/Datasets/slang.csv')
 
-#original features from the dataset
-X_raw = df['word']  
-y_raw = df['label']  
+#original features from the dataset  
+X_raw = df['acronym']  # slang terms/acronyms
+y_raw = df['expansion']  # their meanings/expansions  
 
 # Encode labels
 le = LabelEncoder()
