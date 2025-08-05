@@ -25,11 +25,16 @@ labels = []
 for _, row in df.iterrows():
     file_path = os.path.join(audio_dir, row['filename'])
     if os.path.exists(file_path):
-        y, sr = librosa.load(file_path)
-        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
-        mfcc_mean = np.mean(mfcc, axis=1)
-        features.append(mfcc_mean)
-        labels.append(row['label'])
+        try:
+            y, sr = librosa.load(file_path)
+            mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+            mfcc_mean = np.mean(mfcc, axis=1)
+            features.append(mfcc_mean)
+            labels.append(row['label'])
+            print(f"Successfully processed: {row['filename']}")
+        except Exception as e:
+            print(f"Error processing {file_path}: {e}")
+            continue
     else:
         print(f"File not found: {file_path}")
 
