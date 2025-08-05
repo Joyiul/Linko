@@ -11,6 +11,6 @@ app.register_blueprint(upload_routes)
 app.register_blueprint(analysis_routes)
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(debug=True, port=5001) 
 
     

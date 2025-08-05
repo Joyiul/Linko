@@ -4,8 +4,10 @@ import os
 # Load the complete slang dataset
 def load_slang_data():
     try:
-        # Path to the slang CSV file
-        csv_path = os.path.join('backend', 'Datasets', 'slang.csv')
+        # Path to the slang CSV file - get absolute path
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        csv_path = os.path.join(current_dir, '..', 'Datasets', 'slang.csv')
+        print(f"Looking for slang file at: {csv_path}")
         df = pd.read_csv(csv_path)
         
         # Create a dictionary mapping acronyms to expansions
@@ -30,7 +32,13 @@ def load_slang_data():
             "no cap": "no lie",
             "salty": "upset or bitter",
             "flex": "show off",
-            "lowkey": "kind of or secretly"
+            "lowkey": "kind of or secretly",
+            "periodt": "period, end of discussion",
+            "slaps": "is really good",
+            "hits different": "is exceptionally good",
+            "mid": "mediocre or average",
+            "based": "being yourself authentically",
+            "cringe": "embarrassing or awkward"
         }
 
 # Load the slang data once when module is imported

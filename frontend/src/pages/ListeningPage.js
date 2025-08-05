@@ -26,7 +26,7 @@ export default function ListeningPage() {
       formData.append("file", file);
       
       // Call the complete pipeline endpoint
-      const response = await axios.post("http://localhost:5000/upload-and-analyze", formData, {
+      const response = await axios.post("http://localhost:5001/upload-and-analyze", formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -71,7 +71,7 @@ export default function ListeningPage() {
     setError("");
     
     try {
-      const res = await axios.post("http://localhost:5000/analyze", {
+      const res = await axios.post("http://localhost:5001/analyze", {
         transcript,
       });
       setResults(res.data);
