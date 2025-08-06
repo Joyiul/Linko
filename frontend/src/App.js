@@ -10,7 +10,6 @@ import EmotionAccuracyDemo from './components/EmotionAccuracyDemo';
 import Logo from './components/Logo';
 import LinkoLogo from './components/LinkoLogo';
 import { theme } from './theme';
-// import ChatPage from './pages/ChatPage';
 
 function Navbar() {
   return (
@@ -139,6 +138,22 @@ function Navbar() {
           >
             Emotion Demo
           </Link>
+          <Link 
+            to="/chat" 
+            style={{ 
+              color: theme.colors.onBackground, 
+              textDecoration: 'none', 
+              fontWeight: 'bold',
+              padding: '8px 16px',
+              borderRadius: theme.borderRadius.large,
+              transition: 'all 0.3s ease',
+              fontSize: theme.typography.button.fontSize
+            }}
+            onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'}
+            onMouseLeave={(e) => e.target.style.background = 'transparent'}
+          >
+            AI Chat
+          </Link>
         </div>
       </div>
     </nav>
@@ -194,6 +209,7 @@ function App() {
             <Route path="/videos" element={<VideoPage />} />
             <Route path="/learning-library" element={<LearningLibraryPage />} />
             <Route path="/emotion-demo" element={<EmotionAccuracyDemo />} />
+            <Route path="/chat" element={<ChatPage />} />
             <Route path="/" element={<HomePage />} />
           </Routes>
         </main>

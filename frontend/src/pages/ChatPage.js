@@ -6,7 +6,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "yo what's good! I'm here to break down how you're communicating - like analyzing your tone, catching your slang, and explaining what vibe you're giving off. just talk natural and I'll tell you exactly what energy you're bringing to the conversation",
+      text: "Hello! I'm your language learning assistant. 👋 Send me any English phrase, slang, or sentence and I'll break it down for you - explaining the meaning, tone, cultural context, and any hidden meanings like sarcasm. Perfect for learning English nuances!",
       sender: 'bot',
       timestamp: new Date(),
       analysis: null
@@ -25,87 +25,71 @@ export default function ChatPage() {
   }, [messages]);
 
   const generateBotResponse = (userMessage, analysis) => {
-    // Start with casual acknowledgment
-    const casualOpeners = [
-      "Yooo", "Aight so", "Okay I see you", "Hold up", "Damn", "Yo listen", 
-      "Real talk", "Nah but fr", "Wait wait", "Bruh", "Okay so"
-    ];
+    let response = "📚 **Phrase Analysis:**\n\n";
     
-    let response = casualOpeners[Math.floor(Math.random() * casualOpeners.length)];
+    // Add the original message
+    response += `**Your message:** "${userMessage}"\n\n`;
     
-    // Add detailed explanation of what they said
-    const messageLength = userMessage.length;
-    if (messageLength < 20) {
-      response += ", you kept it short and sweet there";
-    } else if (messageLength < 50) {
-      response += ", you're getting straight to the point";
-    } else {
-      response += ", you really went into detail with that one";
-    }
-    
-    // Analyze and explain their tone with casual language
+    // Analyze tone with detailed explanation
     if (analysis?.tone) {
       const tone = analysis.tone.toLowerCase();
-      response += ". ";
+      const toneEmoji = getToneEmoji(analysis.tone);
+      
+      response += `**🎭 Tone Analysis:** ${toneEmoji} ${analysis.tone}\n`;
       
       if (tone.includes('sarcastic')) {
-        response += "I can tell you're being sarcastic af right now 😏 Like you're not even trying to hide that attitude. The way you said that has mad sassy energy";
+        response += `This message contains **sarcasm** - meaning you're saying something but actually mean the opposite or are being ironic. Sarcasm can be tricky to detect, especially for language learners, because the literal words don't match the intended meaning.\n\n`;
       } else if (tone.includes('appreciative') || tone.includes('inspirational')) {
-        response += "Your whole vibe is so positive rn! Like you're genuinely being appreciative and that energy is contagious. You sound mad grateful and uplifting";
+        response += `This shows a **positive, grateful tone** - you're expressing appreciation or trying to inspire others. This creates a warm, encouraging feeling.\n\n`;
       } else if (tone.includes('angry') || tone.includes('direct')) {
-        response += "You're coming with some serious direct energy - no sugar coating, just straight facts. You sound like you mean business and you're not playing around";
+        response += `This has a **direct, assertive tone** - you're being straightforward and serious. This isn't necessarily rude, but it shows you mean business.\n\n`;
       } else if (tone.includes('diplomatic')) {
-        response += "You're being super diplomatic about this, like trying to keep things smooth and respectful. That's some mature communication right there";
+        response += `This shows **diplomatic communication** - you're being polite, respectful, and trying to avoid conflict. This is great for professional or sensitive conversations.\n\n`;
       } else if (tone.includes('cautionary')) {
-        response += "You're throwing out some warning vibes, like you're trying to give me a heads up about something. That cautionary tone is real";
+        response += `This has a **warning or cautious tone** - you're trying to alert someone to potential problems or giving advice to be careful.\n\n`;
       } else if (tone.includes('informative')) {
-        response += "You're dropping knowledge bombs rn, like you're really trying to educate and inform. That teacher energy is strong";
+        response += `This is **informative and educational** - you're sharing knowledge or explaining something to help others learn.\n\n`;
       } else {
-        response += "Your tone is pretty chill and neutral - just having a regular conversation without any extra drama";
+        response += `This has a **neutral, conversational tone** - friendly and casual without strong emotions.\n\n`;
       }
     }
     
-    // Explain slang usage in detail
+    // Analyze slang and difficult words
     if (analysis?.slang && Object.keys(analysis.slang).length > 0) {
-      const slangWords = Object.keys(analysis.slang);
-      const slangCount = slangWords.length;
+      response += `**🗣️ Slang & Cultural Terms Found:**\n`;
       
-      response += ". And yo, ";
-      
-      if (slangCount === 1) {
-        const word = slangWords[0];
-        const meaning = analysis.slang[word];
-        response += `you dropped "${word}" in there which means "${meaning}" - that's some solid slang usage right there`;
-      } else if (slangCount === 2) {
-        response += `you used ${slangCount} slang terms: "${slangWords.join('" and "')}" - you're really speaking the language`;
-      } else {
-        response += `you went off with ${slangCount} different slang words! "${slangWords.slice(0,2).join('", "')}" and more - your vocabulary is absolutely unmatched`;
-      }
+      Object.entries(analysis.slang).forEach(([word, meaning]) => {
+        response += `• **"${word}"** means: ${meaning}\n`;
+        response += `  Context: This is informal language you might hear in casual conversations.\n`;
+      });
+      response += "\n";
     }
     
-    // Add a casual reaction/follow-up
-    const reactions = [
-      ". That's actually fire", ". I respect that energy", ". You're valid for that",
-      ". That hits different", ". I see you", ". That's a whole mood",
-      ". No cap that's real", ". I'm here for this vibe", ". Facts though"
+    // Break down sentence structure and meaning
+    response += `**📝 Complete Meaning:**\n`;
+    const messageLength = userMessage.length;
+    const complexity = messageLength > 50 ? "complex" : messageLength > 20 ? "moderate" : "simple";
+    
+    response += `This is a ${complexity} sentence. `;
+    
+    // Provide cultural context
+    if (analysis?.tone?.toLowerCase().includes('sarcastic')) {
+      response += `The sarcasm here means the speaker doesn't literally mean what they're saying - they're being ironic or mocking. In English culture, sarcasm is common but can be confusing for non-native speakers.`;
+    } else {
+      response += `The speaker is communicating directly and genuinely - what they say is what they mean.`;
+    }
+    
+    // Add learning tip
+    response += `\n\n**💡 Learning Tip:** `;
+    const tips = [
+      "Pay attention to context clues and body language to understand the full meaning.",
+      "Practice recognizing tone patterns - they're crucial for English communication.",
+      "Slang changes frequently, so don't worry if you don't know every term.",
+      "When in doubt, it's okay to ask 'What do you mean by that?' - most people are happy to explain.",
+      "Notice how tone can completely change the meaning of the same words."
     ];
     
-    if (Math.random() > 0.3) { // 70% chance to add reaction
-      response += reactions[Math.floor(Math.random() * reactions.length)];
-    }
-    
-    // Sometimes add follow-up questions (40% chance)
-    if (Math.random() > 0.6) {
-      const questions = [
-        ". What made you feel that way though?", 
-        ". You wanna talk more about that?",
-        ". How long you been feeling like this?",
-        ". What's your take on the whole situation?",
-        ". You think I'm reading this right?",
-        ". Am I picking up what you're putting down?"
-      ];
-      response += questions[Math.floor(Math.random() * questions.length)];
-    }
+    response += tips[Math.floor(Math.random() * tips.length)];
     
     return response;
   };
@@ -182,33 +166,44 @@ export default function ChatPage() {
 
   const renderMessageWithHighlights = (message) => {
     if (!message.analysis || message.sender === 'bot') {
+      // Format bot messages with proper line breaks and bold text
+      if (message.sender === 'bot') {
+        const formattedText = message.text
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
+          .replace(/\n/g, '<br>'); // Line breaks
+        return <span dangerouslySetInnerHTML={{ __html: formattedText }} />;
+      }
       return <span>{message.text}</span>;
     }
 
     let highlightedText = message.text;
     const slangWords = message.analysis.slang || {};
     
-    // Highlight slang words
+    // Highlight slang words with enhanced tooltips
     Object.keys(slangWords).forEach(slangWord => {
       const regex = new RegExp(`\\b${slangWord}\\b`, 'gi');
       highlightedText = highlightedText.replace(regex, 
-        `<span class="slang-highlight" title="${slangWords[slangWord]}">${slangWord}</span>`
+        `<span class="slang-highlight" title="💡 '${slangWord}' means: ${slangWords[slangWord]}">${slangWord}</span>`
       );
     });
 
-    // Add sarcasm detection
+    // Enhanced sarcasm detection with clear visual indicator
     const tone = message.analysis.tone?.toLowerCase() || '';
-    if (tone.includes('sarcastic') || tone.includes('cautionary')) {
-      highlightedText = `<span class="sarcasm-highlight">${highlightedText}</span>`;
+    if (tone.includes('sarcastic')) {
+      highlightedText = `<span class="sarcasm-highlight" title="🎭 Sarcasm detected! This person doesn't literally mean what they're saying.">${highlightedText}</span>`;
+    } else if (tone.includes('cautionary') || tone.includes('warning')) {
+      highlightedText = `<span class="warning-highlight" title="⚠️ Warning tone detected">${highlightedText}</span>`;
+    } else if (tone.includes('angry') || tone.includes('direct')) {
+      highlightedText = `<span class="direct-highlight" title="💪 Direct/Assertive tone">${highlightedText}</span>`;
     }
 
     return <span dangerouslySetInnerHTML={{ __html: highlightedText }} />;
   };
 
   const getToneEmoji = (tone) => {
-    if (!tone) return '';
+    if (!tone) return '💬';
     const toneMap = {
-      'appreciative': '😊',
+      'appreciative': '�',
       'cautionary': '⚠️',
       'diplomatic': '🤝',
       'direct': '💪',
@@ -216,9 +211,14 @@ export default function ChatPage() {
       'inspirational': '✨',
       'sarcastic': '😏',
       'neutral': '😐',
-      'happy': '😄',
+      'happy': '�',
       'sad': '😢',
-      'angry': '😠'
+      'angry': '😠',
+      'excited': '🎉',
+      'confused': '😕',
+      'friendly': '😄',
+      'professional': '👔',
+      'casual': '😎'
     };
     
     const lowerTone = tone.toLowerCase();
@@ -233,8 +233,8 @@ export default function ChatPage() {
   return (
     <div className="chat-container">
       <div className="chat-header">
-        <h2>💬 Chat</h2>
-        <p>Just having a regular conversation - see what gets highlighted!</p>
+        <h2>🤖 Language Learning Assistant</h2>
+        <p>Send me any English phrase and I'll explain its meaning, tone, slang, and cultural context!</p>
       </div>
 
       <div className="messages-container">
@@ -252,14 +252,20 @@ export default function ChatPage() {
                 <div className="message-analysis">
                   <div className="tone-indicator">
                     <span className="tone-emoji">{getToneEmoji(message.analysis.tone)}</span>
-                    <span className="tone-text">{message.analysis.tone}</span>
+                    <span className="tone-text">Tone: {message.analysis.tone}</span>
                   </div>
                   
                   {Object.keys(message.analysis.slang || {}).length > 0 && (
                     <div className="slang-indicator">
                       <span className="slang-count">
-                        🗣️ {Object.keys(message.analysis.slang).length} slang term(s) detected
+                        🗣️ Found {Object.keys(message.analysis.slang).length} slang/cultural term(s)
                       </span>
+                    </div>
+                  )}
+                  
+                  {message.analysis.tone?.toLowerCase().includes('sarcastic') && (
+                    <div className="sarcasm-warning">
+                      <span className="sarcasm-alert">🎭 Sarcasm Alert: Not literal meaning!</span>
                     </div>
                   )}
                 </div>
@@ -293,7 +299,7 @@ export default function ChatPage() {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your message here... (Press Enter to send)"
+            placeholder="Type any English phrase here for analysis... (Press Enter to send)"
             className="chat-input"
             rows="2"
             disabled={isLoading}
@@ -310,11 +316,19 @@ export default function ChatPage() {
         <div className="legend">
           <div className="legend-item">
             <span className="legend-color slang-sample"></span>
-            <span>Slang words (hover for meaning)</span>
+            <span>Slang/Cultural terms (hover for definition)</span>
           </div>
           <div className="legend-item">
             <span className="legend-color sarcasm-sample"></span>
-            <span>Sarcasm/Caution detected</span>
+            <span>Sarcasm (not literal meaning!)</span>
+          </div>
+          <div className="legend-item">
+            <span className="legend-color warning-sample"></span>
+            <span>Warning/Cautionary tone</span>
+          </div>
+          <div className="legend-item">
+            <span className="legend-color direct-sample"></span>
+            <span>Direct/Assertive tone</span>
           </div>
         </div>
       </div>
