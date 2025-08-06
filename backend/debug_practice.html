@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Practice Debug Test</title>
+</head>
+<body>
+    <h2>🔧 ImmigrantSlangster Practice Debug</h2>
+    <p>Testing all practice functionality to identify issues...</p>
+    
+    <div id="results"></div>
+    
+    <h3>Test 1: Text Analysis</h3>
+    <button onclick="testTextAnalysis()">Test Text Analysis</button>
+    <div id="text-result"></div>
+    
+    <h3>Test 2: File Upload Test</h3>
+    <input type="file" id="fileInput" accept="audio/*,video/*">
+    <button onclick="testFileUpload()">Test File Upload</button>
+    <div id="file-result"></div>
+    
+    <h3>Test 3: Voice Recording Test</h3>
+    <button id="recordBtn" onclick="testVoiceRecording()">Test Voice Recording</button>
+    <div id="voice-result"></div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:5001';
+        
+        async function testTextAnalysis() {
+            const resultDiv = document.getElementById('text-result');
+            resultDiv.innerHTML = '⏳ Testing text analysis...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        transcript: "I am really excited and happy about this test!"
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div style="background: #d4edda; padding: 10px; border-radius: 5px;">
+                            <strong>✅ Text Analysis Working!</strong><br>
+                            Detected Emotion: ${data.improved_emotion_analysis?.multimodal_analysis?.primary_emotion || 'unknown'}<br>
+                            Confidence: ${(data.improved_emotion_analysis?.multimodal_analysis?.confidence * 100).toFixed(1) || 0}%<br>
+                            Old Tone: ${data.tone || 'unknown'}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div style="background: #f8d7da; padding: 10px; border-radius: 5px;"><strong>❌ Error:</strong> ${data.error || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div style="background: #f8d7da; padding: 10px; border-radius: 5px;"><strong>❌ Connection Error:</strong> ${error.message}</div>`;
+            }
+        }
+        
+        async function testFileUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const resultDiv = document.getElementById('file-result');
+            
+            if (!fileInput.files[0]) {
+                resultDiv.innerHTML = '<div style="background: #fff3cd; padding: 10px; border-radius: 5px;">⚠️ Please select an audio file first</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '⏳ Testing file upload and analysis...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                
+                const response = await fetch(`${API_BASE}/upload-and-analyze`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div style="background: #d4edda; padding: 10px; border-radius: 5px;">
+                            <strong>✅ File Upload & Analysis Working!</strong><br>
+                            Filename: ${data.filename || 'unknown'}<br>
+                            Transcript: ${data.transcript || 'No transcript'}<br>
+                            Tone: ${data.analysis?.tone || 'unknown'}<br>
+                            Robust Emotion: ${data.analysis?.robust_emotion?.multimodal_analysis?.primary_emotion || 'unknown'}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div style="background: #f8d7da; padding: 10px; border-radius: 5px;"><strong>❌ Error:</strong> ${data.error || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div style="background: #f8d7da; padding: 10px; border-radius: 5px;"><strong>❌ Connection Error:</strong> ${error.message}</div>`;
+            }
+        }
+        
+        let mediaRecorder;
+        let recordingChunks = [];
+        
+        async function testVoiceRecording() {
+            const button = document.getElementById('recordBtn');
+            const resultDiv = document.getElementById('voice-result');
+            
+            if (button.textContent === 'Test Voice Recording') {
+                // Start recording
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    recordingChunks = [];
+                    
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            recordingChunks.push(event.data);
+                        }
+                    };
+                    
+                    mediaRecorder.onstop = async () => {
+                        const blob = new Blob(recordingChunks, { type: 'audio/wav' });
+                        
+                        resultDiv.innerHTML = '⏳ Processing recorded audio...';
+                        
+                        try {
+                            const formData = new FormData();
+                            formData.append('file', blob, 'recording.wav');
+                            
+                            const response = await fetch(`${API_BASE}/upload-and-analyze`, {
+                                method: 'POST',
+                                body: formData
+                            });
+                            
+                            const data = await response.json();
+                            
+                            if (response.ok) {
+                                resultDiv.innerHTML = `
+                                    <div style="background: #d4edda; padding: 10px; border-radius: 5px;">
+                                        <strong>✅ Voice Recording & Analysis Working!</strong><br>
+                                        Transcript: ${data.transcript || 'No transcript'}<br>
+                                        Tone: ${data.analysis?.tone || 'unknown'}<br>
+                                        Robust Emotion: ${data.analysis?.robust_emotion?.multimodal_analysis?.primary_emotion || 'unknown'}
+                                    </div>
+                                `;
+                            } else {
+                                resultDiv.innerHTML = `<div style="background: #f8d7da; padding: 10px; border-radius: 5px;"><strong>❌ Error:</strong> ${data.error || 'Unknown error'}</div>`;
+                            }
+                        } catch (error) {
+                            resultDiv.innerHTML = `<div style="background: #f8d7da; padding: 10px; border-radius: 5px;"><strong>❌ Processing Error:</strong> ${error.message}</div>`;
+                        }
+                        
+                        // Stop all tracks
+                        stream.getTracks().forEach(track => track.stop());
+                        button.textContent = 'Test Voice Recording';
+                        button.style.background = '#007bff';
+                    };
+                    
+                    mediaRecorder.start();
+                    button.textContent = 'Stop Recording';
+                    button.style.background = '#dc3545';
+                    resultDiv.innerHTML = '<div style="background: #fff3cd; padding: 10px; border-radius: 5px;">🎤 Recording... Click "Stop Recording" when done</div>';
+                    
+                } catch (error) {
+                    resultDiv.innerHTML = `<div style="background: #f8d7da; padding: 10px; border-radius: 5px;"><strong>❌ Microphone Error:</strong> ${error.message}</div>`;
+                }
+            } else {
+                // Stop recording
+                mediaRecorder.stop();
+            }
+        }
+        
+        // Auto-run text analysis test
+        window.onload = function() {
+            testTextAnalysis();
+        };
+    </script>
+    
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        button { padding: 10px 20px; margin: 10px 0; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        div[id$="-result"] { margin: 10px 0; min-height: 20px; }
+        h3 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+    </style>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Linko handwritten text -->
+  <g transform="translate(20, 50)">
+    <!-- L -->
+    <path d="M20 50 L20 200 L60 200" stroke="#666666" stroke-width="12" fill="none" stroke-linecap="round"/>
+    
+    <!-- i with decorative swirl -->
+    <circle cx="90" cy="70" r="6" fill="#666666"/>
+    <path d="M90 90 L90 200" stroke="#666666" stroke-width="12" stroke-linecap="round"/>
+    <path d="M70 40 Q80 30 90 40 Q100 50 110 40" stroke="#A8D8A8" stroke-width="8" fill="none" stroke-linecap="round"/>
+    
+    <!-- n -->
+    <path d="M130 200 L130 120 Q130 100 150 100 Q170 100 170 120 L170 200" stroke="#666666" stroke-width="12" fill="none" stroke-linecap="round"/>
+    
+    <!-- k -->
+    <path d="M200 50 L200 200 M200 140 L230 110 M200 140 L230 200" stroke="#666666" stroke-width="12" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Earth globe -->
+  <g transform="translate(280, 80)">
+    <!-- Earth base circle -->
+    <ellipse cx="60" cy="60" rx="50" ry="45" fill="#87CEEB" stroke="#666666" stroke-width="4"/>
+    
+    <!-- Green landmasses -->
+    <!-- Left continent -->
+    <path d="M25 40 Q35 35 45 45 Q50 55 40 65 Q30 70 25 60 Q20 50 25 40" fill="#A8D8A8"/>
+    
+    <!-- Right continent -->
+    <path d="M70 35 Q85 30 95 40 Q100 50 90 60 Q85 70 75 65 Q65 55 70 35" fill="#A8D8A8"/>
+    
+    <!-- Bottom landmass -->
+    <path d="M40 75 Q50 70 65 75 Q75 85 65 95 Q50 100 40 95 Q35 85 40 75" fill="#A8D8A8"/>
+    
+    <!-- Cute face -->
+    <!-- Eyes -->
+    <circle cx="50" cy="50" r="2.5" fill="#333333"/>
+    <circle cx="70" cy="50" r="2.5" fill="#333333"/>
+    
+    <!-- Heart smile -->
+    <text x="60" y="70" text-anchor="middle" font-size="12" fill="#333333">♡</text>
+  </g>
+</svg>

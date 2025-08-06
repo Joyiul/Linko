@@ -8,6 +8,7 @@ import ChatPage from './pages/ChatPage';
 import LearningLibraryPage from './pages/LearningLibraryPage';
 import EmotionAccuracyDemo from './components/EmotionAccuracyDemo';
 import Logo from './components/Logo';
+import LinkoLogo from './components/LinkoLogo';
 import { theme } from './theme';
 // import ChatPage from './pages/ChatPage';
 
@@ -27,9 +28,17 @@ function Navbar() {
         alignItems: 'center',
         padding: '0 20px'
       }}>
-        {/* Logo Section - Just the earth icon */}
+        {/* Logo Section - Your uploaded Linko logo */}
         <Link to="/" style={{ textDecoration: 'none' }}>
-          <Logo size="medium" showText={false} />
+          <img 
+            src="/CC753331-5C2B-4868-98C6-ABBD4196200E.png" 
+            alt="Linko Logo" 
+            style={{ 
+              height: '40px',
+              width: 'auto',
+              filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.2))'
+            }} 
+          />
         </Link>
         
         {/* Navigation Links */}

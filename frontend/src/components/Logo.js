@@ -19,60 +19,101 @@ const Logo = ({ size = 'medium', showText = false, className = '' }) => {
         justifyContent: 'center'
       }}
     >
-      {/* Just the cute earth icon - matching your logo style */}
+      {/* Earth icon as semi-circle with flat bottom */}
       <div
         style={{
           width: currentSize.width,
-          height: currentSize.height,
-          borderRadius: '50%',
-          background: 'linear-gradient(135deg, #A8D8A8 0%, #87CEEB 100%)',
+          height: currentSize.height / 2,
+          borderRadius: `${currentSize.width}px ${currentSize.width}px 0 0`,
+          background: '#87CEEB', // Sky blue base
           border: '3px solid #666666',
+          borderBottom: '3px solid #666666',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
-          boxShadow: '2px 2px 6px rgba(0,0,0,0.15)'
+          boxShadow: '2px 2px 6px rgba(0,0,0,0.15)',
+          overflow: 'hidden'
         }}
       >
-        {/* Simple cute face */}
+        {/* Green landmasses - adjusted for semi-circle */}
+        {/* Left landmass */}
         <div style={{
-          position: 'relative',
+          position: 'absolute',
+          left: '15%',
+          top: '10%',
+          width: '35%',
+          height: '60%',
+          background: '#A8D8A8',
+          borderRadius: '50% 40% 60% 30%',
+          transform: 'rotate(-15deg)'
+        }} />
+        
+        {/* Right landmass */}
+        <div style={{
+          position: 'absolute',
+          right: '10%',
+          top: '20%',
+          width: '25%',
+          height: '45%',
+          background: '#A8D8A8',
+          borderRadius: '40% 50% 30% 60%',
+          transform: 'rotate(20deg)'
+        }} />
+        
+        {/* Bottom landmass */}
+        <div style={{
+          position: 'absolute',
+          bottom: '5%',
+          left: '30%',
+          width: '40%',
+          height: '35%',
+          background: '#A8D8A8',
+          borderRadius: '60% 30% 50% 40%',
+          transform: 'rotate(-10deg)'
+        }} />
+        
+        {/* Cute face overlay - adjusted for semi-circle */}
+        <div style={{
+          position: 'absolute',
           width: '100%',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          zIndex: 10
         }}>
           {/* Eyes */}
           <div style={{
             position: 'absolute',
-            top: '30%',
-            left: '35%',
-            width: '3px',
-            height: '3px',
+            top: '25%',
+            left: '32%',
+            width: '4px',
+            height: '4px',
             borderRadius: '50%',
             backgroundColor: '#333333'
           }} />
           <div style={{
             position: 'absolute',
-            top: '30%',
-            right: '35%',
-            width: '3px',
-            height: '3px',
+            top: '25%',
+            right: '32%',
+            width: '4px',
+            height: '4px',
             borderRadius: '50%',
             backgroundColor: '#333333'
           }} />
-          {/* Smile */}
+          
+          {/* Small heart-shaped smile */}
           <div style={{
             position: 'absolute',
-            bottom: '35%',
+            bottom: '25%',
             left: '50%',
             transform: 'translateX(-50%)',
-            width: '8px',
-            height: '4px',
-            borderBottom: '2px solid #333333',
-            borderRadius: '0 0 8px 8px'
-          }} />
+            fontSize: '8px',
+            color: '#333333'
+          }}>
+            ♡
+          </div>
         </div>
       </div>
     </div>
