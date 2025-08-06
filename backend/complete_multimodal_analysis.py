@@ -122,8 +122,14 @@ class MultimodalEmotionAnalyzer:
             # Convert to grayscale for face detection
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             
-            # Detect faces
-            faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+            # Detect faces with more relaxed parameters for small images
+            faces = face_cascade.detectMultiScale(
+                gray, 
+                scaleFactor=1.05, 
+                minNeighbors=3, 
+                minSize=(15, 15),
+                maxSize=(200, 200)
+            )
             
             results = []
             for i, (x, y, w, h) in enumerate(faces):
