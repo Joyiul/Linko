@@ -6,7 +6,7 @@ from flask import Flask
 from flask_cors import CORS
 from routes.upload import upload_routes
 from routes.analysis import analysis_routes
-from routes.facial import facial_routes
+from routes.facial_updated import facial_routes
 
 app = Flask(__name__)
 CORS(app)
