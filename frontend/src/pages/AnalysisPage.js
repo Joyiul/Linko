@@ -59,19 +59,19 @@ export default function AnalysisPage() {
       <h2>Analysis Results</h2>
       
       {results.filename && (
-        <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#F8FBF8', borderRadius: '5px', border: '1px solid #C5E4C5' }}>
+        <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '5px', border: '1px solid #dee2e6' }}>
           <strong>📁 File:</strong> {results.filename}
         </div>
       )}
 
       {/* Enhanced Emotion Analysis Section */}
       <div style={{ marginBottom: '30px' }}>
-        <h3>🎭 Emotion & Tone Analysis</h3>
+        <h3>Emotion & Tone Analysis</h3>
         
         {/* Primary Tone */}
         <div style={{ marginBottom: '20px' }}>
           <h4>Primary Tone</h4>
-          <EmojiToneBar tone={analysis.tone || results.tone || "😐 Neutral"} />
+          <EmojiToneBar tone={analysis.tone || results.tone || "Neutral"} />
         </div>
 
         {/* Detailed Emotion Analysis */}
@@ -80,22 +80,23 @@ export default function AnalysisPage() {
             backgroundColor: '#FFFFFF', 
             padding: '20px', 
             borderRadius: '10px',
-            border: '1px solid #C5E4C5',
+            border: '1px solid #dee2e6',
             marginBottom: '20px'
           }}>
-            <h4 style={{ marginBottom: '15px' }}>🔍 Detailed Emotion Detection</h4>
+            <h4 style={{ marginBottom: '15px' }}>Detailed Emotion Detection</h4>
             
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
-              <span style={{ fontSize: '2em', marginRight: '15px' }}>
-                {getEmotionEmoji(emotionAnalysis.detected_emotion)}
-              </span>
               <div>
-                <div style={{ fontSize: '1.2em', fontWeight: 'bold', textTransform: 'capitalize' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: '500', textTransform: 'capitalize', fontFamily: 'Poppins, Nunito, Circular, sans-serif', color: '#6c757d', letterSpacing: '0.2px' }}>
                   {emotionAnalysis.detected_emotion}
                 </div>
                 <div style={{ 
-                  fontSize: '0.9em', 
-                  color: getConfidenceColor(emotionAnalysis.confidence || 0)
+                  fontSize: '0.95rem', 
+                  color: getConfidenceColor(emotionAnalysis.confidence || 0),
+                  fontFamily: 'Poppins, Nunito, Circular, sans-serif',
+                  fontStyle: 'italic',
+                  fontWeight: '400',
+                  letterSpacing: '0.1px'
                 }}>
                   Confidence: {((emotionAnalysis.confidence || 0) * 100).toFixed(1)}%
                 </div>
@@ -115,9 +116,8 @@ export default function AnalysisPage() {
                       borderRadius: '5px',
                       border: score > 0 ? '2px solid #28a745' : '1px solid #dee2e6'
                     }}>
-                      <div style={{ fontSize: '1.5em' }}>{getEmotionEmoji(emotion)}</div>
-                      <div style={{ fontSize: '0.8em', textTransform: 'capitalize' }}>{emotion}</div>
-                      <div style={{ fontWeight: 'bold', color: score > 0 ? '#28a745' : '#6c757d' }}>
+                      <div style={{ fontSize: '0.85rem', textTransform: 'capitalize', fontFamily: 'Poppins, Nunito, Circular, sans-serif', color: '#6c757d', fontWeight: '400', letterSpacing: '0.1px' }}>{emotion}</div>
+                      <div style={{ fontWeight: '500', color: score > 0 ? '#28a745' : '#6c757d', fontFamily: 'Poppins, Nunito, Circular, sans-serif', fontSize: '0.9rem' }}>
                         {score}
                       </div>
                     </div>
@@ -132,10 +132,10 @@ export default function AnalysisPage() {
         {analysis.analysis_confidence && (
           <div style={{ 
             padding: '10px', 
-            backgroundColor: analysis.analysis_confidence === 'high' ? '#F8FBF8' : '#FDFEFE',
+            backgroundColor: analysis.analysis_confidence === 'high' ? '#f8f9fa' : '#ffffff',
             borderRadius: '5px',
             marginBottom: '20px',
-            border: '1px solid #C5E4C5'
+            border: '1px solid #dee2e6'
           }}>
             <strong>Analysis Quality:</strong> {analysis.analysis_confidence} 
             {analysis.transcript_length && ` (${analysis.transcript_length} words)`}
@@ -150,7 +150,7 @@ export default function AnalysisPage() {
             padding: '15px', 
             backgroundColor: '#FFFFFF', 
             borderRadius: '5px',
-            border: '1px solid #C5E4C5',
+            border: '1px solid #dee2e6',
             fontStyle: 'italic'
           }}>
             <HighlightedText text={results.transcript} />
@@ -166,31 +166,41 @@ export default function AnalysisPage() {
           <ul style={{ 
             listStyle: 'none', 
             padding: 0,
-            backgroundColor: '#F8FBF8',
+            backgroundColor: '#f8f9fa',
             borderRadius: '5px',
             padding: '15px',
-            border: '1px solid #C5E4C5'
+            border: '1px solid #dee2e6'
           }}>
             {Object.entries(analysis.slang || results.slang || {}).map(([word, meaning]) => (
               <li key={word} style={{ 
-                marginBottom: '10px',
-                padding: '8px',
+                marginBottom: '12px',
+                padding: '12px',
                 backgroundColor: 'white',
-                borderRadius: '3px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                borderRadius: '6px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
+                fontFamily: 'Poppins, Nunito, Circular, sans-serif',
+                lineHeight: '1.5',
+                fontWeight: '400',
+                fontSize: '1rem'
               }}>
-                <strong style={{ color: '#A8D8A8' }}>"{word}"</strong> → {meaning}
+                <strong style={{ color: '#6c757d', fontWeight: '600', letterSpacing: '0.1px' }}>"{word}"</strong> 
+                <span style={{ color: '#6c757d', fontSize: '1rem', fontWeight: '400' }}> → {meaning}</span>
               </li>
             ))}
           </ul>
         ) : (
           <p style={{ 
-            color: '#666', 
+            color: '#6c757d', 
             fontStyle: 'italic',
-            padding: '15px',
+            padding: '16px',
             backgroundColor: '#FFFFFF',
-            borderRadius: '5px',
-            border: '1px solid #C5E4C5'
+            borderRadius: '6px',
+            border: '1px solid #dee2e6',
+            fontFamily: 'Poppins, Nunito, Circular, sans-serif',
+            fontSize: '1rem',
+            lineHeight: '1.5',
+            fontWeight: '400',
+            letterSpacing: '0.1px'
           }}>
             No slang terms detected in this text
           </p>

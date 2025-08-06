@@ -627,7 +627,7 @@ export default function VideoPage() {
       padding: 20, 
       maxWidth: 800, 
       margin: '0 auto',
-      background: 'linear-gradient(135deg, #F8FBF8 0%, #FDFEFE 100%)',
+      background: 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
       minHeight: '100vh',
       color: '#333333'
     }}>

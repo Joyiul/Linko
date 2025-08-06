@@ -35,7 +35,7 @@ export default function ChatPage() {
       const tone = analysis.tone.toLowerCase();
       const toneEmoji = getToneEmoji(analysis.tone);
       
-      response += `**🎭 Tone Analysis:** ${toneEmoji} ${analysis.tone}\n`;
+      response += `**Tone Analysis:** ${analysis.tone}\n`;
       
       if (tone.includes('sarcastic')) {
         response += `This message contains **sarcasm** - meaning you're saying something but actually mean the opposite or are being ironic. Sarcasm can be tricky to detect, especially for language learners, because the literal words don't match the intended meaning.\n\n`;
@@ -190,7 +190,7 @@ export default function ChatPage() {
     // Enhanced sarcasm detection with clear visual indicator
     const tone = message.analysis.tone?.toLowerCase() || '';
     if (tone.includes('sarcastic')) {
-      highlightedText = `<span class="sarcasm-highlight" title="🎭 Sarcasm detected! This person doesn't literally mean what they're saying.">${highlightedText}</span>`;
+      highlightedText = `<span class="sarcasm-highlight" title="Sarcasm detected! This person doesn't literally mean what they're saying.">${highlightedText}</span>`;
     } else if (tone.includes('cautionary') || tone.includes('warning')) {
       highlightedText = `<span class="warning-highlight" title="⚠️ Warning tone detected">${highlightedText}</span>`;
     } else if (tone.includes('angry') || tone.includes('direct')) {
@@ -250,7 +250,7 @@ export default function ChatPage() {
               {message.analysis && message.sender === 'user' && (
                 <div className="message-analysis">
                   <div className="tone-indicator">
-                    <span className="tone-emoji">{getToneEmoji(message.analysis.tone)}</span>
+                    <span className="tone-text">{message.analysis.tone}</span>
                     <span className="tone-text">Tone: {message.analysis.tone}</span>
                   </div>
                   
@@ -264,7 +264,7 @@ export default function ChatPage() {
                   
                   {message.analysis.tone?.toLowerCase().includes('sarcastic') && (
                     <div className="sarcasm-warning">
-                      <span className="sarcasm-alert">🎭 Sarcasm Alert: Not literal meaning!</span>
+                      <span className="sarcasm-alert">Sarcasm Alert: Not literal meaning!</span>
                     </div>
                   )}
                 </div>

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from processing.audio_analysis import analyze_audio
-from processing.slang_detect import detect_slang
+from processing.slang_detect import detect_slang, enhanced_detector
 from processing.robust_emotion_analysis import analyze_emotion_robust
 import os
 import tempfile
@@ -50,6 +50,77 @@ def enhance_emotion_analysis(transcript, base_tone):
             'emotion_scores': emotion_scores
         }
 
+def get_comprehensive_slang_analysis(transcript):
+    """Get detailed slang analysis with categorization"""
+    slang_results = detect_slang(transcript)
+    
+    if not slang_results:
+        return {
+            'found_terms': {},
+            'categories': {},
+            'statistics': enhanced_detector.get_slang_statistics(),
+            'summary': 'No slang or modern expressions detected.'
+        }
+    
+    # Categorize found terms
+    categories = {
+        'acronym': [],
+        'genz_word': [],
+        'genz_slang': [],
+        'emoji': []
+    }
+    
+    high_popularity_count = 0
+    
+    for term, info in slang_results.items():
+        term_type = info.get('type', 'unknown')
+        popularity = info.get('popularity', 'medium')
+        
+        if term_type in categories:
+            categories[term_type].append({
+                'term': term,
+                'meaning': info.get('meaning', ''),
+                'popularity': popularity,
+                'example': info.get('example', ''),
+                'name': info.get('name', '')  # For emojis
+            })
+        
+        if popularity == 'high':
+            high_popularity_count += 1
+    
+    # Generate summary
+    total_found = len(slang_results)
+    summary_parts = []
+    
+    if categories['genz_word']:
+        summary_parts.append(f"{len(categories['genz_word'])} modern slang terms")
+    if categories['emoji']:
+        summary_parts.append(f"{len(categories['emoji'])} emojis with special meanings")
+    if categories['acronym']:
+        summary_parts.append(f"{len(categories['acronym'])} abbreviations")
+    if categories['genz_slang']:
+        summary_parts.append(f"{len(categories['genz_slang'])} Gen Z expressions")
+    
+    if summary_parts:
+        summary = f"Found {total_found} modern expressions: " + ", ".join(summary_parts) + "."
+        if high_popularity_count > 0:
+            summary += f" {high_popularity_count} are highly popular/trending terms."
+    else:
+        summary = f"Found {total_found} expressions in modern internet/youth language."
+    
+    return {
+        'found_terms': slang_results,
+        'categories': categories,
+        'statistics': enhanced_detector.get_slang_statistics(),
+        'summary': summary,
+        'trends': {
+            'total_found': total_found,
+            'high_popularity': high_popularity_count,
+            'has_emojis': len(categories['emoji']) > 0,
+            'has_modern_slang': len(categories['genz_word']) > 0
+        }
+    }
+
 @analysis_routes.route("/analyze", methods=["POST"])
 def analyze_file():
     data = request.get_json()
@@ -64,18 +135,19 @@ def analyze_file():
     # Enhance with more detailed emotion detection (legacy support)
     enhanced_emotion = enhance_emotion_analysis(transcript, base_tone)
     
-    # Get slang analysis
-    slang_result = detect_slang(transcript)
+    # Get comprehensive slang analysis with all datasets
+    comprehensive_slang = get_comprehensive_slang_analysis(transcript)
 
     # Return both old and new analysis for comparison
     return jsonify({
         "tone": base_tone,
         "emotion_analysis": enhanced_emotion,  # Legacy
         "improved_emotion_analysis": improved_analysis,  # NEW - More accurate and robust
-        "slang": slang_result,
+        "slang": comprehensive_slang['found_terms'],  # Legacy format
+        "comprehensive_slang_analysis": comprehensive_slang,  # NEW - Detailed analysis
         "transcript_length": len(transcript.split()),
         "analysis_confidence": "high" if len(transcript.split()) > 10 else "low",
-        "recommendation": "Use 'improved_emotion_analysis' for better accuracy"
+        "recommendation": "Use 'comprehensive_slang_analysis' for detailed modern language insights"
     })
 
 @analysis_routes.route("/analyze-multimodal", methods=["POST"])
@@ -127,3 +199,37 @@ def analyze_multimodal():
             "error": str(e),
             "fallback_emotion": "neutral"
         }), 500
+
+@analysis_routes.route("/slang-stats", methods=["GET"])
+def get_slang_statistics():
+    """Get statistics about the slang database"""
+    return jsonify({
+        "status": "success",
+        "statistics": enhanced_detector.get_slang_statistics(),
+        "database_info": {
+            "description": "Comprehensive modern language database including Gen Z slang, emojis, and acronyms",
+            "sources": [
+                "Traditional internet acronyms and abbreviations",
+                "Modern Gen Z words and phrases with definitions",
+                "Current Gen Z slang terms",
+                "Emoji meanings in modern context"
+            ]
+        }
+    })
+
+@analysis_routes.route("/test-slang", methods=["POST"])
+def test_slang_detection():
+    """Test endpoint for slang detection"""
+    data = request.get_json()
+    test_text = data.get("text", "")
+    
+    if not test_text:
+        return jsonify({"error": "No text provided"}), 400
+    
+    result = get_comprehensive_slang_analysis(test_text)
+    
+    return jsonify({
+        "status": "success",
+        "input_text": test_text,
+        "analysis": result
+    })

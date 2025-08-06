@@ -1,24 +1,33 @@
 .analysis-container {
   padding: 32px;
-  background: linear-gradient(135deg, #F8FBF8 0%, #FDFEFE 100%);
-  color: #333333;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  color: #555555;
   min-height: 100vh;
-  font-family: 'Inter', Arial, sans-serif;
+  font-family: 'Poppins', 'Nunito', 'Circular', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.7;
+  letter-spacing: 0.2px;
+  font-weight: 400;
 }
 
 .analysis-container h2 {
   margin-top: 0;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #666666;
+  font-size: 2.2rem;
+  font-weight: 500;
+  color: #6c757d;
+  font-family: 'Poppins', 'Nunito', 'Circular', sans-serif;
+  letter-spacing: 0.5px;
+  line-height: 1.3;
 }
 
 .analysis-container h4 {
-  margin-bottom: 8px;
-  margin-top: 24px;
-  font-size: 1.1rem;
-  color: #A8D8A8;
-  font-weight: 600;
+  margin-bottom: 16px;
+  margin-top: 32px;
+  font-size: 1.2rem;
+  color: #6c757d;
+  font-weight: 500;
+  font-family: 'Poppins', 'Nunito', 'Circular', sans-serif;
+  letter-spacing: 0.2px;
+  line-height: 1.4;
 }
 
 .analysis-container ul {
@@ -27,13 +36,20 @@
 }
 
 .analysis-container li {
-  margin-bottom: 6px;
+  margin-bottom: 10px;
   font-size: 1rem;
+  line-height: 1.5;
+  color: #6c757d;
+  font-weight: 400;
+  letter-spacing: 0.1px;
 }
 
 .analysis-container strong {
-  color: #333333;
-  background: #F8FBF8;
-  padding: 2px 6px;
-  border-radius: 4px;
+  color: #495057;
+  background: #f8f9fa;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-family: 'Poppins', 'Nunito', 'Circular', sans-serif;
+  letter-spacing: 0.1px;
 }
