@@ -25,16 +25,16 @@ export default function AnalysisPage() {
 
   const getEmotionEmoji = (emotion) => {
     const emojiMap = {
-      'angry': '😠',
-      'happy': '😊', 
-      'sad': '😢',
-      'fear': '😨',
-      'disgust': '🤢',
-      'surprise': '😲',
-      'neutral': '😐',
-      'ps': '🤔'
+      'angry': 'ANGRY',
+      'happy': 'HAPPY', 
+      'sad': 'SAD',
+      'fear': 'FEAR',
+      'disgust': 'DISGUST',
+      'surprise': 'SURPRISE',
+      'neutral': 'NEUTRAL',
+      'ps': 'THINKING'
     };
-    return emojiMap[emotion] || '😐';
+    return emojiMap[emotion] || 'NEUTRAL';
   };
 
   const getConfidenceColor = (confidence) => {
@@ -56,7 +56,7 @@ export default function AnalysisPage() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>🎯 Analysis Results</h2>
+      <h2>Analysis Results</h2>
       
       {results.filename && (
         <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#e8f4fd', borderRadius: '5px' }}>
@@ -143,7 +143,7 @@ export default function AnalysisPage() {
       </div>
 
       <div style={{ marginBottom: '30px' }}>
-        <h3>📝 Transcript</h3>
+        <h3>Transcript</h3>
         {results.transcript ? (
           <div style={{ 
             padding: '15px', 
@@ -160,7 +160,7 @@ export default function AnalysisPage() {
       </div>
 
       <div>
-        <h3>🗣️ Slang Detection</h3>
+        <h3>Slang Detection</h3>
         {Object.keys(analysis.slang || results.slang || {}).length > 0 ? (
           <ul style={{ 
             listStyle: 'none', 
@@ -207,7 +207,7 @@ export default function AnalysisPage() {
             fontSize: '16px'
           }}
         >
-          🎤 Analyze Another File
+          Analyze Another File
         </button>
       </div>
     </div>

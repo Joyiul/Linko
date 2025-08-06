@@ -77,7 +77,7 @@ export default function VoiceRecorder({ onRecordingComplete }) {
               gap: '10px'
             }}
           >
-            🎙️ Start Recording
+            Start Recording
           </button>
         ) : (
           <button
@@ -98,7 +98,7 @@ export default function VoiceRecorder({ onRecordingComplete }) {
               animation: 'pulse 1.5s infinite'
             }}
           >
-            ⏹️ Stop Recording
+            Stop Recording
           </button>
         )}
       </div>
@@ -109,7 +109,7 @@ export default function VoiceRecorder({ onRecordingComplete }) {
           fontWeight: 'bold',
           animation: 'pulse 1s infinite'
         }}>
-          🔴 Recording in progress...
+          Recording in progress...
         </div>
       )}
 
@@ -121,7 +121,7 @@ export default function VoiceRecorder({ onRecordingComplete }) {
           borderRadius: '5px',
           color: '#155724'
         }}>
-          ✅ Recording completed! Ready to decipher.
+          Recording completed! Ready to decipher.
         </div>
       )}
 

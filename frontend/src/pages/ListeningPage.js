@@ -26,7 +26,7 @@ export default function ListeningPage() {
     const audioSource = file || recordedBlob;
     
     if (!audioSource && !transcript.trim()) {
-      setError("Please upload a file, record audio, or enter text to analyze");
+      setError("Please provide audio or text to analyze");
       return;
     }
 
@@ -151,7 +151,7 @@ export default function ListeningPage() {
 
   return (
     <div className="listening-container">
-      <h2 className="listening-title">🎯 Audio Analysis & Slang Detection</h2>
+      <h2 className="listening-title">Audio Analysis & Slang Detection</h2>
       
       {error && (
         <div className="error-message" style={{
@@ -162,7 +162,7 @@ export default function ListeningPage() {
           borderRadius: '8px',
           border: '1px solid #ff9999'
         }}>
-          ⚠️ {error}
+          {error}
         </div>
       )}
       
@@ -188,7 +188,7 @@ export default function ListeningPage() {
               fontWeight: 'bold'
             }}
           >
-            📁 Upload File
+            Upload File
           </button>
           <button
             onClick={() => setActiveTab("record")}
@@ -203,7 +203,7 @@ export default function ListeningPage() {
               fontWeight: 'bold'
             }}
           >
-            🎙️ Record Audio
+            Record Audio
           </button>
           <button
             onClick={() => setActiveTab("text")}
@@ -218,7 +218,7 @@ export default function ListeningPage() {
               fontWeight: 'bold'
             }}
           >
-            ✏️ Enter Text
+            Enter Text
           </button>
         </div>
       </div>
@@ -233,7 +233,7 @@ export default function ListeningPage() {
             borderRadius: '10px',
             backgroundColor: '#f8f9fa'
           }}>
-            <h3>📁 Upload Audio or Video File</h3>
+            <h3>Upload Audio or Video File</h3>
             <p style={{ color: '#666', marginBottom: '20px' }}>
               Supports: WAV, MP3, MP4, AVI, MOV, FLAC, M4A, OGG
             </p>
@@ -263,7 +263,7 @@ export default function ListeningPage() {
                 borderRadius: '5px',
                 color: '#155724'
               }}>
-                ✅ Selected: {file.name}
+                Selected: {file.name}
               </div>
             )}
           </div>
@@ -277,7 +277,7 @@ export default function ListeningPage() {
             borderRadius: '10px',
             backgroundColor: '#fff5f5'
           }}>
-            <h3>🎙️ Record Your Voice</h3>
+            <h3>Record Your Voice</h3>
             <p style={{ color: '#666', marginBottom: '20px' }}>
               Click the button below to start recording audio
             </p>
@@ -292,7 +292,7 @@ export default function ListeningPage() {
             borderRadius: '10px',
             backgroundColor: '#f8fff8'
           }}>
-            <h3>✏️ Enter Text for Analysis</h3>
+            <h3>Enter Text for Analysis</h3>
             <textarea
               rows="6"
               className="upload-input"
@@ -350,7 +350,7 @@ export default function ListeningPage() {
             }
           }}
         >
-          {loading ? '🔄 Deciphering...' : '🔍 DECIPHER'}
+          {loading ? 'Deciphering...' : 'DECIPHER'}
         </button>
         
         {loading && (
@@ -374,7 +374,7 @@ export default function ListeningPage() {
           borderRadius: '8px',
           border: '1px solid #adb5bd'
         }}>
-          <h5 style={{ marginBottom: '10px', color: '#495057' }}>📝 Current Text:</h5>
+          <h5 style={{ marginBottom: '10px', color: '#495057' }}>Current Text:</h5>
           <p style={{ 
             fontStyle: 'italic', 
             color: '#6c757d',
