@@ -1,0 +1,182 @@
+{
+  "OAF_bath_fear.wav": {
+    "status": "valid",
+    "checksum": "0c21a73b10e00fb06952d29f4ae16fda7439f1684810c460b7bb5f9de438fcbc",
+    "size": 86734,
+    "backed_up": true
+  },
+  "OAF_bar_happy.wav": {
+    "status": "valid",
+    "checksum": "fedf31adea722ad80e43be3dda72e4af75d8595ff93f5b60ab037f224ae651d6",
+    "size": 97728,
+    "backed_up": true
+  },
+  "OAF_bath_angry.wav": {
+    "status": "valid",
+    "checksum": "6393d1a8d47737765c359beed77cf21c1f3e0f68a1d8a4d209d29f30e1a1db56",
+    "size": 78516,
+    "backed_up": true
+  },
+  "OAF_bar_sad.wav": {
+    "status": "valid",
+    "checksum": "efcf425782249903e55d7bf467f851e92a04379548b0d291bc414ebf325d0857",
+    "size": 122212,
+    "backed_up": true
+  },
+  "OAF_base_fear.wav": {
+    "status": "valid",
+    "checksum": "306fadb71b5ec74d65c2285a9b3d8163a667c32e5a67acfc60e5c6cb392b0f92",
+    "size": 91322,
+    "backed_up": true
+  },
+  "OAF_base_ps.wav": {
+    "status": "valid",
+    "checksum": "fbbadb39abdc02ed5f85403cce99f205f057ec6833c9cca5e8b75f65a2088bc1",
+    "size": 105734,
+    "backed_up": true
+  },
+  "OAF_bath_ps.wav": {
+    "status": "valid",
+    "checksum": "417a13fb3b1aa9444139579270d3d2a6924a8cdabe78d60309466b373a5af7de",
+    "size": 101378,
+    "backed_up": true
+  },
+  "OAF_bath_sad.wav": {
+    "status": "valid",
+    "checksum": "e228ffe50b8a52c9b9c0f444ca2fd2d4324c46c097185e5b712e65530f483479",
+    "size": 126236,
+    "backed_up": true
+  },
+  "OAF_back_neutral.wav": {
+    "status": "valid",
+    "checksum": "6ddf6cada3918e22251e414a0b0fdf1317cbea7d1373b23b5ae5c391c0f90b18",
+    "size": 99832,
+    "backed_up": true
+  },
+  "OAF_back_fear.wav": {
+    "status": "valid",
+    "checksum": "e5ec01b96f7520f4367d64c9a9ca88976fe960daa44ea05690635fcafae0a105",
+    "size": 84388,
+    "backed_up": true
+  },
+  "OAF_bar_disgust.wav": {
+    "status": "valid",
+    "checksum": "6dc85b92575919edceced5745700bef10e007bd32d4eb647bb3f0b6f395877c3",
+    "size": 111040,
+    "backed_up": true
+  },
+  "OAF_bath_disgust.wav": {
+    "status": "valid",
+    "checksum": "ada49e67d550895b7447baaaaaca1b94460c06ce7cb8d8dcc9a9667cf75d8bf1",
+    "size": 113042,
+    "backed_up": true
+  },
+  "OAF_base_neutral.wav": {
+    "status": "valid",
+    "checksum": "c21c7a3db53b64b46370eb2a9d1c8f35df42fa726f5f798415817e536c7a31d4",
+    "size": 105028,
+    "backed_up": true
+  },
+  "OAF_back_angry.wav": {
+    "status": "valid",
+    "checksum": "516e65737480f4ca3c1de7580c9a43df4ec60abb1c7c443ed43abf18da5ad146",
+    "size": 75204,
+    "backed_up": true
+  },
+  "OAF_bean_disgust.wav": {
+    "status": "valid",
+    "checksum": "e3de1b2bba58b9a25b78d1f5ea77e7f7ce7cd87d40429ced8abc832040c9818c",
+    "size": 114624,
+    "backed_up": true
+  },
+  "OAF_base_angry.wav": {
+    "status": "valid",
+    "checksum": "7c4d00ff69aced330715ca06d8207c073e32b73a3ddc76c3e26ddff7ff1ea61a",
+    "size": 75350,
+    "backed_up": true
+  },
+  "OAF_bean_angry.wav": {
+    "status": "valid",
+    "checksum": "7162e9db1878b3d2c993c9fd5c053ea768fd2469a08662425f4c27510f68eac7",
+    "size": 68180,
+    "backed_up": true
+  },
+  "OAF_bar_angry.wav": {
+    "status": "valid",
+    "checksum": "da36eef593124ced6d2136550b9e18c46fe11b1a06df521d2020ed44bf1deb35",
+    "size": 78992,
+    "backed_up": true
+  },
+  "OAF_base_sad.wav": {
+    "status": "valid",
+    "checksum": "20999876f285b31ff058e31d6f140fdc6e11bf3850a4d1fb20b744744b18f6c3",
+    "size": 125524,
+    "backed_up": true
+  },
+  "OAF_bath_happy.wav": {
+    "status": "valid",
+    "checksum": "1846c21bb1012ace27f7d3075649b0d420eb22e4df33d71bb2d525ee21bb131b",
+    "size": 99424,
+    "backed_up": true
+  },
+  "OAF_bar_fear.wav": {
+    "status": "valid",
+    "checksum": "b1aaa3af770c7d0f482100d7a28629b180bafbcb4057408855b83ba5526a098b",
+    "size": 82560,
+    "backed_up": true
+  },
+  "OAF_back_disgust.wav": {
+    "status": "valid",
+    "checksum": "723d26643716f24dee89decab5c910118fb41168db95481fec0f058da9f5ff86",
+    "size": 110424,
+    "backed_up": true
+  },
+  "OAF_bath_neutral.wav": {
+    "status": "valid",
+    "checksum": "0e4509187bfc3374e776c3f09d45965c56ce55465da6d721a99d6c309f913d88",
+    "size": 105758,
+    "backed_up": true
+  },
+  "OAF_base_disgust.wav": {
+    "status": "valid",
+    "checksum": "5960f17f771826efb35b2286492a7a715dc1bb604f7d7807a2b8df1068bda815",
+    "size": 121998,
+    "backed_up": true
+  },
+  "OAF_bar_ps.wav": {
+    "status": "valid",
+    "checksum": "d132a998515274022bf1b4072c2c69383a1edda2378caaf543360d6e8d21d61f",
+    "size": 94510,
+    "backed_up": true
+  },
+  "OAF_back_ps.wav": {
+    "status": "valid",
+    "checksum": "c224e42e83619e4da1ce2d5a1ffd60d786fe5e63ced14eb0f1e8c0c936b7e36f",
+    "size": 99294,
+    "backed_up": true
+  },
+  "OAF_back_happy.wav": {
+    "status": "valid",
+    "checksum": "bb895f0e0fc6af76980e372554c1b8b0daf2cae9fc9142bae5cec686f6de58d0",
+    "size": 97758,
+    "backed_up": true
+  },
+  "OAF_bar_neutral.wav": {
+    "status": "valid",
+    "checksum": "da2dd00e4f42cd76e0eb7d797b3a314dde23ab22337bfb3c4fe76f1fc9454632",
+    "size": 97808,
+    "backed_up": true
+  },
+  "OAF_back_sad.wav": {
+    "status": "valid",
+    "checksum": "f67fe9e9c124d1af4fa6b684d0bc2474fb81f3e13284d68017b538cd901985f7",
+    "size": 125172,
+    "backed_up": true
+  },
+  "OAF_base_happy.wav": {
+    "status": "valid",
+    "checksum": "0c6de55894fd209b2122c1f22c4f8a33879e7c1bf43e4933f19655ade4b28105",
+    "size": 99330,
+    "backed_up": true
+  }
+}
