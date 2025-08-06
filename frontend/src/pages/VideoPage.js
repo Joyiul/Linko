@@ -126,10 +126,35 @@ export default function VideoPage() {
       setError('');
       chunksRef.current = [];
       
-      const mediaRecorder = new MediaRecorder(streamRef.current, {
-        mimeType: 'video/webm;codecs=vp9,opus'
-      });
+      // Check MediaRecorder support
+      if (!window.MediaRecorder) {
+        throw new Error('MediaRecorder not supported in this browser');
+      }
+
+      // Try different codec options based on browser support
+      let options = null;
+      const supportedMimeTypes = [
+        'video/webm;codecs=vp9,opus',
+        'video/webm;codecs=vp8,opus',
+        'video/webm;codecs=h264,opus',
+        'video/webm',
+        'video/mp4;codecs=h264,aac',
+        'video/mp4'
+      ];
+
+      for (const mimeType of supportedMimeTypes) {
+        if (MediaRecorder.isTypeSupported(mimeType)) {
+          options = { mimeType };
+          console.log('Using MIME type:', mimeType);
+          break;
+        }
+      }
+
+      if (!options) {
+        console.log('No supported MIME types found, using default');
+      }
       
+      const mediaRecorder = new MediaRecorder(streamRef.current, options);
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (event) => {
@@ -139,17 +164,61 @@ export default function VideoPage() {
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+        const mimeType = options?.mimeType || 'video/webm';
+        const blob = new Blob(chunksRef.current, { type: mimeType });
         setRecordedVideoBlob(blob);
         setRecordedVideoUrl(URL.createObjectURL(blob));
         stopCamera();
       };
 
+      mediaRecorder.onerror = (event) => {
+        console.error('MediaRecorder error:', event.error);
+        setError(`Recording error: ${event.error?.message || 'Unknown error'}`);
+        setIsRecording(false);
+      };
+
       mediaRecorder.start(1000); // Record in 1-second chunks
       setIsRecording(true);
+      console.log('Recording started successfully');
     } catch (err) {
       console.error('Recording start error:', err);
-      setError('Failed to start recording. Your browser might not support video recording.');
+      let errorMessage = 'Failed to start recording. ';
+      
+      if (err.message.includes('MediaRecorder not supported')) {
+        errorMessage += 'Your browser does not support video recording. Try using Chrome, Firefox, or Edge.';
+      } else if (err.name === 'NotSupportedError') {
+        errorMessage += 'The selected video format is not supported. Trying alternative format...';
+        // Try again with no options (browser default)
+        try {
+          const fallbackRecorder = new MediaRecorder(streamRef.current);
+          mediaRecorderRef.current = fallbackRecorder;
+          
+          fallbackRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              chunksRef.current.push(event.data);
+            }
+          };
+
+          fallbackRecorder.onstop = () => {
+            const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+            setRecordedVideoBlob(blob);
+            setRecordedVideoUrl(URL.createObjectURL(blob));
+            stopCamera();
+          };
+
+          fallbackRecorder.start(1000);
+          setIsRecording(true);
+          console.log('Fallback recording started');
+          return;
+        } catch (fallbackErr) {
+          console.error('Fallback recording failed:', fallbackErr);
+          errorMessage += ' Fallback recording also failed.';
+        }
+      } else {
+        errorMessage += `Error: ${err.message}`;
+      }
+      
+      setError(errorMessage);
     }
   }, [startCamera, stopCamera]);
 
@@ -216,6 +285,31 @@ export default function VideoPage() {
     return 'Unknown';
   };
 
+  // Check MediaRecorder support and available codecs
+  const getRecordingSupport = () => {
+    if (!window.MediaRecorder) {
+      return { supported: false, codecs: [] };
+    }
+
+    const testCodecs = [
+      'video/webm;codecs=vp9,opus',
+      'video/webm;codecs=vp8,opus', 
+      'video/webm;codecs=h264,opus',
+      'video/webm',
+      'video/mp4;codecs=h264,aac',
+      'video/mp4'
+    ];
+
+    const supportedCodecs = testCodecs.filter(codec => 
+      MediaRecorder.isTypeSupported(codec)
+    );
+
+    return { 
+      supported: true, 
+      codecs: supportedCodecs.length > 0 ? supportedCodecs : ['browser default']
+    };
+  };
+
   return (
     <div style={{ 
       padding: 20, 
@@ -239,9 +333,22 @@ export default function VideoPage() {
         fontSize: 14
       }}>
         <p><strong>Browser:</strong> {getBrowserInfo()} | <strong>Permission:</strong> {permissionState}</p>
+        <p><strong>Recording Support:</strong> {
+          (() => {
+            const support = getRecordingSupport();
+            return support.supported 
+              ? `✅ Supported (${support.codecs.length} codec${support.codecs.length !== 1 ? 's' : ''})` 
+              : '❌ Not Supported';
+          })()
+        }</p>
         {permissionState === 'denied' && (
           <p style={{ color: '#ff6b6b', fontWeight: 'bold' }}>
             ⚠️ Camera permission denied. Please click the camera icon in your browser's address bar to allow access.
+          </p>
+        )}
+        {!getRecordingSupport().supported && (
+          <p style={{ color: '#ff6b6b', fontWeight: 'bold' }}>
+            ⚠️ Video recording not supported. Please use Chrome, Firefox, or Edge for recording functionality.
           </p>
         )}
       </div>
@@ -367,7 +474,7 @@ export default function VideoPage() {
 
         {/* Recording Controls */}
         <div style={{ display: 'flex', gap: 15, flexWrap: 'wrap', justifyContent: 'center' }}>
-          {!recordedVideoUrl && !isRecording && hasCamera && (
+          {!recordedVideoUrl && !isRecording && hasCamera && getRecordingSupport().supported && (
             <button
               onClick={startRecording}
               style={{
@@ -387,6 +494,22 @@ export default function VideoPage() {
             >
               🎥 Start Recording
             </button>
+          )}
+
+          {!recordedVideoUrl && !isRecording && hasCamera && !getRecordingSupport().supported && (
+            <div style={{
+              padding: '15px 30px',
+              background: '#95a5a6',
+              color: 'white',
+              borderRadius: 25,
+              fontSize: 16,
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10
+            }}>
+              🚫 Recording Not Supported
+            </div>
           )}
 
           {isRecording && (
@@ -487,14 +610,17 @@ export default function VideoPage() {
           maxWidth: 600,
           fontSize: 14
         }}>
-          <h4>🔧 Camera Troubleshooting:</h4>
+          <h4>🔧 Recording Troubleshooting:</h4>
           <ul style={{ lineHeight: 1.6 }}>
+            <li><strong>Browser Support:</strong> Chrome (recommended), Firefox, Edge support recording. Safari has limited support.</li>
+            <li><strong>Codec Issues:</strong> If recording fails, the app will try multiple video formats automatically</li>
             <li><strong>Permission Denied:</strong> Click the camera icon in the address bar and select "Allow"</li>
             <li><strong>No Camera Found:</strong> Check if your camera is connected and not being used by other apps</li>
             <li><strong>Chrome:</strong> Go to Settings → Privacy and security → Site Settings → Camera</li>
             <li><strong>Firefox:</strong> Click the shield icon → Permissions → Camera → Allow</li>
-            <li><strong>Safari:</strong> Safari → Preferences → Websites → Camera → Allow</li>
+            <li><strong>Safari:</strong> Safari → Preferences → Websites → Camera → Allow (recording may not work)</li>
             <li><strong>HTTPS Required:</strong> Camera access requires secure connection (https://)</li>
+            <li><strong>Hardware Acceleration:</strong> Enable hardware acceleration in browser settings for better performance</li>
           </ul>
         </div>
 
