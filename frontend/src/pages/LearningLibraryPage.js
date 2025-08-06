@@ -1,9 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './LearningLibraryPage.css';
 
 export default function LearningLibraryPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Add error boundary for this component
+  useEffect(() => {
+    const handleError = (event) => {
+      console.error('LearningLibraryPage error:', event.error);
+      setError('An unexpected error occurred in the Learning Library');
+    };
+
+    const handleUnhandledRejection = (event) => {
+      console.error('LearningLibraryPage unhandled promise rejection:', event.reason);
+      setError('A network error occurred. Please refresh the page.');
+      event.preventDefault();
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
+
+  // Load videos from backend on component mount
+  useEffect(() => {
+    loadVideos().catch(error => {
+      console.error('Failed to load videos in useEffect:', error);
+      setError('Failed to initialize video library');
+      setLoading(false);
+    });
+  }, []);
+
+  const loadVideos = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const response = await axios.get('http://localhost:5002/learning-library/videos', {
+        timeout: 10000, // 10 second timeout
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.data && response.data.videos) {
+        setVideos(response.data.videos);
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (err) {
+      console.error('Error loading videos:', err);
+      let errorMessage = 'Failed to load videos. Please try again.';
+      
+      if (err.code === 'ECONNABORTED') {
+        errorMessage = 'Request timed out. Please check your connection.';
+      } else if (err.response) {
+        errorMessage = `Server error: ${err.response.status}`;
+      } else if (err.request) {
+        errorMessage = 'Cannot connect to server. Make sure the backend is running.';
+      }
+      
+      setError(errorMessage);
+      setVideos([]); // Clear videos on error
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const videoCategories = [
     { id: 'all', name: 'All Lessons', icon: '📚' },
@@ -15,168 +85,9 @@ export default function LearningLibraryPage() {
     { id: 'cultural', name: 'Cultural Context', icon: '🌍' }
   ];
 
-  const videoLibrary = [
-    {
-      id: 1,
-      title: "Understanding Sarcasm in English",
-      description: "Learn to identify and use sarcasm appropriately in conversations. Master the subtle cues and context clues.",
-      category: 'tones',
-      duration: '8:32',
-      level: 'Intermediate',
-      thumbnail: '🎭',
-      instructor: 'Sarah Chen',
-      videoUrl: 'https://example.com/sarcasm-video',
-      skills: ['Tone Recognition', 'Cultural Context', 'Social Cues'],
-      views: '12.5K'
-    },
-    {
-      id: 2,
-      title: "Common American Slang Expressions",
-      description: "Master popular slang terms used in everyday American conversations, from 'lit' to 'no cap'.",
-      category: 'slang',
-      duration: '12:45',
-      level: 'Beginner',
-      thumbnail: '💬',
-      instructor: 'Mike Rodriguez',
-      videoUrl: 'https://example.com/slang-video',
-      skills: ['Vocabulary', 'Informal Language', 'Youth Culture'],
-      views: '25.3K'
-    },
-    {
-      id: 3,
-      title: "Expressing Emotions Naturally",
-      description: "Learn how to express different emotions in English with proper intonation, facial expressions, and body language.",
-      category: 'tones',
-      duration: '15:20',
-      level: 'Intermediate',
-      thumbnail: '😊',
-      instructor: 'Emma Watson',
-      videoUrl: 'https://example.com/emotions-video',
-      skills: ['Emotional Expression', 'Intonation', 'Body Language'],
-      views: '18.7K'
-    },
-    {
-      id: 4,
-      title: "Professional Email Communication",
-      description: "Master the art of writing professional emails in workplace settings. Templates and examples included.",
-      category: 'workplace',
-      duration: '10:15',
-      level: 'Advanced',
-      thumbnail: '💼',
-      instructor: 'David Kim',
-      videoUrl: 'https://example.com/email-video',
-      skills: ['Business Writing', 'Formal Language', 'Email Etiquette'],
-      views: '8.9K'
-    },
-    {
-      id: 5,
-      title: "Pronunciation: TH Sounds Mastery",
-      description: "Perfect your pronunciation of difficult 'th' sounds in English through targeted exercises and practice.",
-      category: 'pronunciation',
-      duration: '6:30',
-      level: 'Beginner',
-      thumbnail: '🗣️',
-      instructor: 'Lisa Thompson',
-      videoUrl: 'https://example.com/pronunciation-video',
-      skills: ['Phonetics', 'Speech Training', 'Accent Reduction'],
-      views: '33.1K'
-    },
-    {
-      id: 6,
-      title: "Small Talk & Social Conversations",
-      description: "Build confidence in casual conversations and small talk situations. Perfect for networking and socializing.",
-      category: 'conversation',
-      duration: '14:22',
-      level: 'Intermediate',
-      thumbnail: '💭',
-      instructor: 'Alex Johnson',
-      videoUrl: 'https://example.com/smalltalk-video',
-      skills: ['Social Skills', 'Conversation Starters', 'Cultural Awareness'],
-      views: '21.4K'
-    },
-    {
-      id: 7,
-      title: "Understanding Passive-Aggressive Communication",
-      description: "Recognize and respond to passive-aggressive communication styles in workplace and personal settings.",
-      category: 'tones',
-      duration: '11:18',
-      level: 'Advanced',
-      thumbnail: '😤',
-      instructor: 'Dr. Rachel Green',
-      videoUrl: 'https://example.com/passive-aggressive-video',
-      skills: ['Communication Styles', 'Conflict Resolution', 'Workplace Dynamics'],
-      views: '15.6K'
-    },
-    {
-      id: 8,
-      title: "Internet Slang & Text Speak",
-      description: "Decode modern internet slang, abbreviations, and text messaging language used on social media.",
-      category: 'slang',
-      duration: '9:45',
-      level: 'Beginner',
-      thumbnail: '📱',
-      instructor: 'Zoe Martinez',
-      videoUrl: 'https://example.com/internet-slang-video',
-      skills: ['Digital Communication', 'Abbreviations', 'Online Culture'],
-      views: '29.8K'
-    },
-    {
-      id: 9,
-      title: "American vs British Cultural Context",
-      description: "Understand the cultural differences in communication styles between American and British English.",
-      category: 'cultural',
-      duration: '13:55',
-      level: 'Intermediate',
-      thumbnail: '🌍',
-      instructor: 'James Oxford',
-      videoUrl: 'https://example.com/cultural-video',
-      skills: ['Cultural Awareness', 'Regional Differences', 'Context Clues'],
-      views: '11.2K'
-    },
-    {
-      id: 10,
-      title: "Confident Public Speaking",
-      description: "Develop confidence and clarity in public speaking situations, from presentations to job interviews.",
-      category: 'conversation',
-      duration: '18:30',
-      level: 'Advanced',
-      thumbnail: '🎤',
-      instructor: 'Maria Santos',
-      videoUrl: 'https://example.com/public-speaking-video',
-      skills: ['Public Speaking', 'Confidence Building', 'Presentation Skills'],
-      views: '16.3K'
-    },
-    {
-      id: 11,
-      title: "Dealing with Difficult Customers",
-      description: "Learn professional tone and language for handling challenging customer service situations.",
-      category: 'workplace',
-      duration: '12:08',
-      level: 'Intermediate',
-      thumbnail: '📞',
-      instructor: 'Robert Wilson',
-      videoUrl: 'https://example.com/customer-service-video',
-      skills: ['Customer Service', 'Conflict Resolution', 'Professional Tone'],
-      views: '9.7K'
-    },
-    {
-      id: 12,
-      title: "Vowel Sounds for Clear Speech",
-      description: "Master English vowel sounds to improve your speaking clarity and reduce accent interference.",
-      category: 'pronunciation',
-      duration: '14:45',
-      level: 'Beginner',
-      thumbnail: '🔤',
-      instructor: 'Jennifer Adams',
-      videoUrl: 'https://example.com/vowels-video',
-      skills: ['Vowel Pronunciation', 'Speech Clarity', 'Accent Training'],
-      views: '27.4K'
-    }
-  ];
-
   const filteredVideos = selectedCategory === 'all' 
-    ? videoLibrary 
-    : videoLibrary.filter(video => video.category === selectedCategory);
+    ? videos 
+    : videos.filter(video => video.category === selectedCategory);
 
   const openVideoModal = (video) => {
     setSelectedVideo(video);
@@ -187,13 +98,36 @@ export default function LearningLibraryPage() {
   };
 
   const getLevelColor = (level) => {
-    switch(level) {
-      case 'Beginner': return '#28a745';
-      case 'Intermediate': return '#ffc107';
-      case 'Advanced': return '#dc3545';
+    switch(level?.toLowerCase()) {
+      case 'beginner': return '#28a745';
+      case 'intermediate': return '#ffc107';
+      case 'advanced': return '#dc3545';
       default: return '#6c757d';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="learning-library-container">
+        <div className="loading-state">
+          <h2>Loading Learning Library...</h2>
+          <p>Getting the latest educational videos for you</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="learning-library-container">
+        <div className="error-state">
+          <h2>Error Loading Videos</h2>
+          <p>{error}</p>
+          <button onClick={loadVideos} className="retry-btn">Try Again</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="learning-library-container">
@@ -201,9 +135,10 @@ export default function LearningLibraryPage() {
         <h2>Learning Library</h2>
         <p>Master English communication through expert-led video lessons</p>
         <div className="stats">
-          <span>📊 {videoLibrary.length} Lessons</span>
-          <span>👥 12 Expert Instructors</span>
-          <span>⭐ 4.8 Average Rating</span>
+          <span>📊 {videos.length} Lessons</span>
+          <span>👥 Expert Instructors</span>
+          <span>⭐ Real Educational Content</span>
+          <span>🎥 Interactive Videos</span>
         </div>
       </div>
 
@@ -278,15 +213,47 @@ export default function LearningLibraryPage() {
             </div>
             <div className="modal-content">
               <div className="video-player">
-                <div className="video-placeholder">
-                  <span className="placeholder-icon">{selectedVideo.thumbnail}</span>
-                  <div className="player-controls">
-                    <button className="play-video-btn">
-                      <span>▶</span> Start Lesson
-                    </button>
+                {selectedVideo.real_video && selectedVideo.videoUrl ? (
+                  <div>
+                    <iframe
+                      width="100%"
+                      height="400"
+                      src={selectedVideo.videoUrl}
+                      title={selectedVideo.title}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      style={{ borderRadius: '8px' }}
+                      onError={() => console.log('Video failed to load')}
+                    ></iframe>
+                    <div style={{ marginTop: '10px', textAlign: 'center' }}>
+                      <a 
+                        href={selectedVideo.videoUrl.replace('/embed/', '/watch?v=')} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{ 
+                          color: '#007bff', 
+                          textDecoration: 'none',
+                          fontSize: '14px'
+                        }}
+                      >
+                        🔗 Open video in YouTube →
+                      </a>
+                    </div>
                   </div>
-                  <p className="video-note">Interactive Video Player</p>
-                </div>
+                ) : (
+                  <div className="video-placeholder">
+                    <span className="placeholder-icon">{selectedVideo.thumbnail}</span>
+                    <div className="player-controls">
+                      <button className="play-video-btn">
+                        <span>▶</span> Start Lesson
+                      </button>
+                    </div>
+                    <p className="video-note">
+                      {selectedVideo.real_video ? 'Loading Video Player...' : 'Interactive Video Player'}
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="video-details">
                 <div className="video-stats-row">
@@ -323,7 +290,19 @@ export default function LearningLibraryPage() {
                 </div>
                 
                 <div className="action-buttons">
-                  <button className="primary-btn">Start Learning</button>
+                  <button 
+                    className="primary-btn"
+                    onClick={() => {
+                      if (selectedVideo.real_video && selectedVideo.videoUrl) {
+                        // Video is already playing in iframe
+                        closeVideoModal();
+                      } else {
+                        alert('This video will be available soon!');
+                      }
+                    }}
+                  >
+                    {selectedVideo.real_video ? 'Close Video' : 'Coming Soon'}
+                  </button>
                   <button className="secondary-btn">Save for Later</button>
                   <button className="secondary-btn">Share Lesson</button>
                 </div>

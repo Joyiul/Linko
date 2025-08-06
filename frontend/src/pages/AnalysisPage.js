@@ -143,6 +143,123 @@ export default function AnalysisPage() {
         )}
       </div>
 
+      {/* Video Analysis Section */}
+      {analysis.video_analysis && (
+        <div style={{ marginBottom: '30px' }}>
+          <h3>Video Analysis Results</h3>
+          <div style={{
+            backgroundColor: '#FFFFFF',
+            padding: '20px',
+            borderRadius: '10px',
+            border: '1px solid #dee2e6',
+            marginBottom: '20px'
+          }}>
+            <h4 style={{ marginBottom: '15px', color: '#6c757d' }}>Facial Emotion Detection</h4>
+            
+            {/* Primary Emotion from Video */}
+            <div style={{ marginBottom: '15px' }}>
+              <div style={{ fontSize: '1.3rem', fontWeight: '600', textTransform: 'capitalize', color: '#495057' }}>
+                Primary Emotion: {analysis.video_analysis.dominant_emotion || 'Not detected'}
+              </div>
+              {analysis.video_analysis.confidence && (
+                <div style={{
+                  fontSize: '1rem',
+                  color: getConfidenceColor(analysis.video_analysis.confidence),
+                  fontWeight: '500',
+                  marginTop: '5px'
+                }}>
+                  Confidence: {(analysis.video_analysis.confidence * 100).toFixed(1)}%
+                </div>
+              )}
+            </div>
+
+            {/* Video Statistics */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '20px' }}>
+              <div style={{
+                textAlign: 'center',
+                padding: '15px',
+                backgroundColor: '#f8f9fa',
+                borderRadius: '8px',
+                border: '1px solid #dee2e6'
+              }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#28a745' }}>
+                  {analysis.video_analysis.frames_analyzed || 0}
+                </div>
+                <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>Frames Analyzed</div>
+              </div>
+              
+              <div style={{
+                textAlign: 'center',
+                padding: '15px',
+                backgroundColor: '#f8f9fa',
+                borderRadius: '8px',
+                border: '1px solid #dee2e6'
+              }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#17a2b8' }}>
+                  {analysis.video_analysis.faces_detected || 0}
+                </div>
+                <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>Faces Detected</div>
+              </div>
+
+              {analysis.video_info && analysis.video_info.duration_seconds && (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '15px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '8px',
+                  border: '1px solid #dee2e6'
+                }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#fd7e14' }}>
+                    {analysis.video_info.duration_seconds.toFixed(1)}s
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: '#6c757d' }}>Duration</div>
+                </div>
+              )}
+            </div>
+
+            {/* Emotion Distribution */}
+            {analysis.video_analysis.emotion_distribution && Object.keys(analysis.video_analysis.emotion_distribution).length > 1 && (
+              <div style={{ marginTop: '20px' }}>
+                <h5>Emotion Distribution Across Video</h5>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px' }}>
+                  {Object.entries(analysis.video_analysis.emotion_distribution).map(([emotion, count]) => (
+                    <div key={emotion} style={{
+                      textAlign: 'center',
+                      padding: '10px',
+                      backgroundColor: count > 1 ? '#e7f5e7' : '#f8f9fa',
+                      borderRadius: '5px',
+                      border: count > 1 ? '2px solid #28a745' : '1px solid #dee2e6'
+                    }}>
+                      <div style={{ fontSize: '0.85rem', textTransform: 'capitalize', color: '#6c757d' }}>{emotion}</div>
+                      <div style={{ fontWeight: '600', color: count > 1 ? '#28a745' : '#6c757d' }}>
+                        {count} frame{count !== 1 ? 's' : ''}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Video Quality Feedback */}
+            <div style={{
+              marginTop: '20px',
+              padding: '15px',
+              backgroundColor: analysis.video_analysis.faces_detected > 0 ? '#d4edda' : '#fff3cd',
+              borderRadius: '8px',
+              border: `1px solid ${analysis.video_analysis.faces_detected > 0 ? '#c3e6cb' : '#ffeaa7'}`
+            }}>
+              <strong>Video Analysis Summary:</strong>
+              <p style={{ margin: '8px 0 0 0', lineHeight: '1.5' }}>
+                {analysis.video_analysis.faces_detected > 0
+                  ? `Great! Your face was clearly visible in ${analysis.video_analysis.frames_analyzed} analyzed frames. The primary emotion detected was "${analysis.video_analysis.dominant_emotion}" with ${(analysis.video_analysis.confidence * 100).toFixed(0)}% confidence.`
+                  : 'No faces were clearly detected in the video. Try recording with better lighting and positioning yourself closer to the camera for more accurate emotion analysis.'
+                }
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div style={{ marginBottom: '30px' }}>
         <h3>Transcript</h3>
         {results.transcript ? (

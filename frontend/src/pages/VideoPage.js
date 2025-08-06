@@ -252,7 +252,7 @@ export default function VideoPage() {
       formData.append('video', recordedVideoBlob, 'recording.webm');
 
       // Use the dedicated video analysis endpoint
-      const response = await axios.post("http://localhost:5001/analyze-video", formData, {
+      const response = await axios.post("http://localhost:5002/analyze-video", formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -262,45 +262,71 @@ export default function VideoPage() {
       // The video analysis endpoint returns comprehensive analysis results
       const analysisData = response.data;
       
-      // Extract transcript and analysis results
-      const transcript = analysisData.transcript || "Could not extract speech from video";
+      // Check if the analysis was successful
+      if (!analysisData.success) {
+        throw new Error(analysisData.error || 'Video analysis failed');
+      }
+      
+      // Extract analysis results
+      const analysisResults = analysisData.analysis_results || {};
+      const videoInfo = analysisData.video_info || {};
+      
+      // Create a transcript placeholder since video analysis focuses on facial emotions
+      const transcript = analysisData.transcript || "Video analyzed for facial emotions (no speech detected)";
       
       // Prepare comprehensive analysis results
-      let analysisResults = {
+      let combinedResults = {
         transcript: transcript,
         source: "video_recording",
         timestamp: new Date().toISOString(),
         analysis: {
-          tone: analysisData.dominant_emotion || "Neutral",
-          tone_explanation: analysisData.analysis_summary || "Video analysis completed",
+          tone: analysisResults.dominant_emotion || "neutral",
+          tone_explanation: analysisData.summary || "Video facial emotion analysis completed",
           message: "Video analysis with facial emotion detection completed",
-          facial_emotions: analysisData.facial_emotions || [],
-          video_info: analysisData.video_info || {}
+          video_analysis: {
+            dominant_emotion: analysisResults.dominant_emotion,
+            confidence: analysisResults.confidence,
+            frames_analyzed: analysisResults.frames_analyzed,
+            faces_detected: analysisResults.faces_detected_total,
+            emotion_distribution: analysisResults.emotion_distribution,
+            frame_by_frame: analysisResults.frame_by_frame
+          },
+          video_info: videoInfo
         },
         accessibility_features: {
-          tone_explanation: analysisData.analysis_summary || "Your video was analyzed successfully",
-          simplified_message: transcript,
+          tone_explanation: analysisResults.dominant_emotion ? 
+            `Your facial expressions showed primarily ${analysisResults.dominant_emotion} emotion` : 
+            "Your facial expressions were analyzed",
+          simplified_message: analysisData.summary || transcript,
           communication_tips: [
-            "Your facial expressions were captured and analyzed",
-            "Video quality was suitable for emotion detection",
-            transcript !== "Could not extract speech from video" ? "Your speech was clearly detected" : "Consider speaking more clearly toward the microphone"
+            analysisResults.faces_detected_total > 0 ? 
+              "Great! Your face was clearly visible for emotion analysis" : 
+              "Try positioning yourself closer to the camera for better analysis",
+            analysisResults.confidence > 0.7 ? 
+              "Your facial expressions were clear and confident" : 
+              "Keep practicing - facial expression clarity improves with time",
+            videoInfo.duration_seconds ? 
+              `Good video length: ${videoInfo.duration_seconds.toFixed(1)} seconds` : 
+              "Video was successfully recorded"
           ],
-          clarity_score: transcript !== "Could not extract speech from video" ? "Good" : "Needs improvement",
-          suggested_improvements: analysisData.suggestions || [
+          clarity_score: analysisResults.faces_detected_total > 0 ? "Good" : "Needs improvement",
+          suggested_improvements: [
             "Great job recording your video!",
-            "Continue practicing to build confidence"
+            analysisResults.frames_analyzed > 5 ? 
+              "Multiple frames were analyzed for accuracy" : 
+              "Try a slightly longer recording for more comprehensive analysis",
+            "Continue practicing to build confidence with video communication"
           ]
         }
       };
 
-      // If we have slang detection results, include them
-      if (analysisData.slang_analysis) {
-        analysisResults.analysis.slang_analysis = analysisData.slang_analysis;
-        analysisResults.accessibility_features.slang_explanation = analysisData.slang_analysis.explanation;
+      // If we have slang detection results, include them  
+      if (analysisData.slang) {
+        combinedResults.analysis.slang = analysisData.slang;
       }
 
       // Store comprehensive results
-      localStorage.setItem("analysisResults", JSON.stringify(analysisResults));
+      localStorage.setItem("analysisResults", JSON.stringify(combinedResults));
 
       navigate('/analyze');
     } catch (error) {
@@ -409,7 +435,7 @@ export default function VideoPage() {
       const formData = new FormData();
       formData.append('audio', recordedAudioBlob, 'recording.webm');
 
-      const response = await axios.post("http://localhost:5001/upload", formData, {
+      const response = await axios.post("http://localhost:5002/upload", formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -428,7 +454,7 @@ export default function VideoPage() {
       if (transcript && transcript !== "Could not understand the audio clearly") {
         // Send for comprehensive tone analysis with accessibility focus
         try {
-          const analysisResponse = await axios.post("http://localhost:5001/analyze", {
+          const analysisResponse = await axios.post("http://localhost:5002/analyze", {
             transcript: transcript,
             context: "audio_only_recording",
             assistance_type: "neurodivergent_and_esl"

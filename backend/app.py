@@ -19,4 +19,4 @@ app.register_blueprint(facial_routes)
 app.register_blueprint(learning_library_bp, url_prefix='/learning-library')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    app.run(debug=True, port=5002, host='0.0.0.0')
