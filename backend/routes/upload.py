@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 from processing.speech_to_text import transcribe_audio
 from processing.audio_analysis import analyze_audio
 from processing.slang_detect import detect_slang
+from processing.robust_emotion_analysis import analyze_emotion_robust
 
 upload_routes = Blueprint('upload_routes', __name__)
 
@@ -39,45 +40,59 @@ def upload_file():
 @upload_routes.route('/upload-and-analyze', methods=['POST'])
 def upload_and_analyze():
     """Upload audio file and perform speech-to-text + analysis"""
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part in the request'}), 400
-    
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-    
-    if not allowed_file(file.filename):
-        return jsonify({'error': 'File type not allowed. Supported: wav, mp3, mp4, avi, mov, flac, m4a, ogg'}), 400
-    
-    # Ensure uploads directory exists
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-    
-    # Save file
-    filename = secure_filename(file.filename)
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
-    file.save(filepath)
-    
-    # Convert speech to text
-    transcription_result = transcribe_audio(filepath)
-    
-    if 'error' in transcription_result:
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part in the request'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+        
+        if not allowed_file(file.filename):
+            return jsonify({'error': 'File type not allowed. Supported: wav, mp3, mp4, avi, mov, flac, m4a, ogg'}), 400
+        
+        # Ensure uploads directory exists
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        
+        # Save file
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+        
+        # Convert speech to text
+        transcription_result = transcribe_audio(filepath)
+        
+        if 'error' in transcription_result:
+            return jsonify({
+                'error': transcription_result['error'],
+                'filename': filename
+            }), 500
+        
+        transcript = transcription_result['transcript']
+        
+        # Analyze using both old and new systems
+        tone_result = analyze_audio(transcript)
+        slang_result = detect_slang(transcript)
+        
+        # NEW: Use robust emotion analysis
+        robust_analysis = analyze_emotion_robust(text=transcript, audio_path=filepath)
+        
         return jsonify({
-            'error': transcription_result['error'],
-            'filename': filename
+            'filename': filename,
+            'transcript': transcript,
+            'analysis': {
+                'tone': tone_result,  # Legacy
+                'slang': slang_result,
+                'robust_emotion': robust_analysis  # NEW - More accurate
+            },
+            'recommendation': 'Use robust_emotion analysis for best accuracy'
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'error': f'Analysis failed: {str(e)}',
+            'filename': filename if 'filename' in locals() else 'unknown'
         }), 500
-    
-    transcript = transcription_result['transcript']
-    
-    # Analyze the transcript
-    tone_result = analyze_audio(transcript)
-    slang_result = detect_slang(transcript)
-    
-    return jsonify({
-        'filename': filename,
-        'transcript': transcript,
-        'analysis': {
-            'tone': tone_result,
-            'slang': slang_result
-        }
-    })
     

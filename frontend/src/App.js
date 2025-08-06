@@ -1,9 +1,12 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import HomePage from './pages/HomePage';
+import HomePage from './pages/OnboardingPage';
 import ListeningPage from './pages/ListeningPage';
 import AnalysisPage from './pages/AnalysisPage';
 import VideoPage from './pages/VideoPage';
+import ChatPage from './pages/ChatPage';
+import LearningLibraryPage from './pages/LearningLibraryPage';
+import EmotionAccuracyDemo from './components/EmotionAccuracyDemo';
 import Logo from './components/Logo';
 import { theme } from './theme';
 // import ChatPage from './pages/ChatPage';
@@ -95,6 +98,38 @@ function Navbar() {
           >
             View Results
           </Link>
+          <Link 
+            to="/learning-library" 
+            style={{ 
+              color: theme.colors.onBackground, 
+              textDecoration: 'none', 
+              fontWeight: 'bold',
+              padding: '8px 16px',
+              borderRadius: theme.borderRadius.large,
+              transition: 'all 0.3s ease',
+              fontSize: theme.typography.button.fontSize
+            }}
+            onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'}
+            onMouseLeave={(e) => e.target.style.background = 'transparent'}
+          >
+            Learning Library
+          </Link>
+          <Link 
+            to="/emotion-demo" 
+            style={{ 
+              color: theme.colors.onBackground, 
+              textDecoration: 'none', 
+              fontWeight: 'bold',
+              padding: '8px 16px',
+              borderRadius: theme.borderRadius.large,
+              transition: 'all 0.3s ease',
+              fontSize: theme.typography.button.fontSize
+            }}
+            onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'}
+            onMouseLeave={(e) => e.target.style.background = 'transparent'}
+          >
+            Emotion Demo
+          </Link>
         </div>
       </div>
     </nav>
@@ -148,6 +183,8 @@ function App() {
             <Route path="/listen" element={<ListeningPage />} />
             <Route path="/analyze" element={<AnalysisPage />} />
             <Route path="/videos" element={<VideoPage />} />
+            <Route path="/learning-library" element={<LearningLibraryPage />} />
+            <Route path="/emotion-demo" element={<EmotionAccuracyDemo />} />
             <Route path="/" element={<HomePage />} />
           </Routes>
         </main>

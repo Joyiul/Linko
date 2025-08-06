@@ -1,6 +1,9 @@
 from flask import Blueprint, request, jsonify
 from processing.audio_analysis import analyze_audio
 from processing.slang_detect import detect_slang
+from processing.robust_emotion_analysis import analyze_emotion_robust
+import os
+import tempfile
 
 analysis_routes = Blueprint("analysis_routes", __name__)
 
@@ -52,19 +55,75 @@ def analyze_file():
     data = request.get_json()
     transcript = data.get("transcript", "")
     
-    # Get base tone analysis (uses your strong 3,356-sample model)
+    # NEW: Use robust emotion analysis
+    improved_analysis = analyze_emotion_robust(text=transcript)
+    
+    # Get base tone analysis for backward compatibility
     base_tone = analyze_audio(transcript)
     
-    # Enhance with more detailed emotion detection
+    # Enhance with more detailed emotion detection (legacy support)
     enhanced_emotion = enhance_emotion_analysis(transcript, base_tone)
     
     # Get slang analysis
     slang_result = detect_slang(transcript)
 
+    # Return both old and new analysis for comparison
     return jsonify({
         "tone": base_tone,
-        "emotion_analysis": enhanced_emotion,
+        "emotion_analysis": enhanced_emotion,  # Legacy
+        "improved_emotion_analysis": improved_analysis,  # NEW - More accurate and robust
         "slang": slang_result,
         "transcript_length": len(transcript.split()),
-        "analysis_confidence": "high" if len(transcript.split()) > 10 else "low"
+        "analysis_confidence": "high" if len(transcript.split()) > 10 else "low",
+        "recommendation": "Use 'improved_emotion_analysis' for better accuracy"
     })
+
+@analysis_routes.route("/analyze-multimodal", methods=["POST"])
+def analyze_multimodal():
+    """New endpoint for comprehensive multimodal emotion analysis"""
+    try:
+        # Handle JSON data
+        if request.is_json:
+            data = request.get_json()
+            transcript = data.get("transcript", "")
+            
+            # Analyze text only for JSON requests
+            result = analyze_emotion_robust(text=transcript)
+            
+        # Handle form data with files
+        else:
+            transcript = request.form.get("transcript", "")
+            audio_file = request.files.get("audio")
+            
+            # Save uploaded audio file temporarily
+            audio_path = None
+            
+            if audio_file:
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as tmp_audio:
+                    audio_file.save(tmp_audio.name)
+                    audio_path = tmp_audio.name
+            
+            # Run multimodal analysis
+            result = analyze_emotion_robust(
+                text=transcript if transcript else None,
+                audio_path=audio_path
+            )
+            
+            # Cleanup temporary file
+            if audio_path and os.path.exists(audio_path):
+                os.unlink(audio_path)
+        
+        return jsonify({
+            "status": "success",
+            "analysis": result,
+            "timestamp": data.get("timestamp") if request.is_json else None
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "error",
+            "error": str(e),
+            "fallback_emotion": "neutral"
+        }), 500

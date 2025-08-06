@@ -1,0 +1,241 @@
+{
+  "summary": {
+    "total_tests": 21,
+    "old_accuracy": 0.0,
+    "new_accuracy": 90.47619047619048,
+    "improvement": 90.47619047619048
+  },
+  "detailed_results": [
+    {
+      "test_id": 1,
+      "text": "I am so happy and excited about this amazing opportunity! This is fantastic!",
+      "expected": "happy",
+      "old_result": "Direct",
+      "new_result": "happy",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 2,
+      "text": "What a wonderful day! I feel absolutely fantastic and full of joy.",
+      "expected": "happy",
+      "old_result": "Direct",
+      "new_result": "happy",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 3,
+      "text": "I love this so much! This is the best thing ever!",
+      "expected": "happy",
+      "old_result": "Direct",
+      "new_result": "angry",
+      "new_confidence": 0,
+      "old_correct": false,
+      "new_correct": false,
+      "improvement": false
+    },
+    {
+      "test_id": 4,
+      "text": "I am really sad and feel quite down today. I'm feeling very depressed.",
+      "expected": "sad",
+      "old_result": "Diplomatic",
+      "new_result": "sad",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 5,
+      "text": "This is so painful and hurtful. I feel terrible and miserable.",
+      "expected": "sad",
+      "old_result": "Direct",
+      "new_result": "sad",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 6,
+      "text": "I'm crying because I feel so lonely and hurt by what happened.",
+      "expected": "sad",
+      "old_result": "Diplomatic",
+      "new_result": "sad",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 7,
+      "text": "I am extremely angry and furious about this situation! This is totally unacceptable!",
+      "expected": "angry",
+      "old_result": "Direct",
+      "new_result": "angry",
+      "new_confidence": 0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 8,
+      "text": "I'm so pissed off and mad at what they did. This really irritates me!",
+      "expected": "angry",
+      "old_result": "Direct",
+      "new_result": "angry",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 9,
+      "text": "I hate this so much! I'm really annoyed and fed up with everything!",
+      "expected": "angry",
+      "old_result": "Cautionary",
+      "new_result": "angry",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 10,
+      "text": "I'm really scared and afraid of what might happen. I'm so nervous and anxious.",
+      "expected": "fear",
+      "old_result": "Cautionary",
+      "new_result": "fear",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 11,
+      "text": "This is terrifying! I'm quite worried and feel panic setting in.",
+      "expected": "fear",
+      "old_result": "Diplomatic",
+      "new_result": "fear",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 12,
+      "text": "I'm frightened by this situation and feel very anxious about it.",
+      "expected": "fear",
+      "old_result": "Diplomatic",
+      "new_result": "fear",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 13,
+      "text": "Wow! This is absolutely incredible and totally unexpected!",
+      "expected": "surprise",
+      "old_result": "Direct",
+      "new_result": "surprise",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 14,
+      "text": "Oh my! I'm so surprised and shocked by this amazing news!",
+      "expected": "surprise",
+      "old_result": "Neutral",
+      "new_result": "surprise",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 15,
+      "text": "Unbelievable! This is quite astonishing and really surprising!",
+      "expected": "surprise",
+      "old_result": "Cautionary",
+      "new_result": "angry",
+      "new_confidence": 0,
+      "old_correct": false,
+      "new_correct": false,
+      "improvement": false
+    },
+    {
+      "test_id": 16,
+      "text": "This is disgusting and revolting! I feel sick and it's totally gross.",
+      "expected": "disgust",
+      "old_result": "Direct",
+      "new_result": "disgust",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 17,
+      "text": "That's absolutely horrible and nasty. This is really awful and revolting.",
+      "expected": "disgust",
+      "old_result": "Direct",
+      "new_result": "disgust",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 18,
+      "text": "Yuck! This is so gross and makes me feel quite sick.",
+      "expected": "disgust",
+      "old_result": "Direct",
+      "new_result": "disgust",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 19,
+      "text": "The meeting is scheduled for 3 PM. Please bring the documents.",
+      "expected": "neutral",
+      "old_result": "Direct",
+      "new_result": "neutral",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 20,
+      "text": "According to the data, the results show standard performance metrics.",
+      "expected": "neutral",
+      "old_result": "Direct",
+      "new_result": "neutral",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    },
+    {
+      "test_id": 21,
+      "text": "The weather today is typical for this time of year.",
+      "expected": "neutral",
+      "old_result": "Inspirational",
+      "new_result": "neutral",
+      "new_confidence": 1.0,
+      "old_correct": false,
+      "new_correct": true,
+      "improvement": true
+    }
+  ]
+}
