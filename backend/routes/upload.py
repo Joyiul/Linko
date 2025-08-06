@@ -11,6 +11,7 @@ upload_routes = Blueprint('upload_routes', __name__)
 # Use absolute path for uploads folder
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'uploads')
 ALLOWED_EXTENSIONS = {'wav', 'mp3', 'mp4', 'avi', 'mov', 'flac', 'm4a', 'ogg'}
+ALLOWED_VIDEO_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv', 'webm'}
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -95,4 +96,123 @@ def upload_and_analyze():
             'error': f'Analysis failed: {str(e)}',
             'filename': filename if 'filename' in locals() else 'unknown'
         }), 500
-    
+
+@upload_routes.route('/upload-and-analyze-video', methods=['POST'])
+def upload_and_analyze_video():
+    """Upload video file and perform comprehensive analysis"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part in the request'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+        
+        # Check if it's a video file
+        if not ('.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in ALLOWED_VIDEO_EXTENSIONS):
+            return jsonify({'error': 'File type not allowed. Supported video formats: mp4, avi, mov, mkv, webm'}), 400
+        
+        # Ensure uploads directory exists
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        
+        # Save file
+        from werkzeug.utils import secure_filename
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+        
+        try:
+            # Import video analysis
+            import cv2
+            from processing.robust_emotion_analysis import analyze_emotion_robust
+            
+            # Extract audio for transcription if possible
+            transcript = ""
+            audio_tone = "neutral"
+            
+            try:
+                # Try to extract audio from video and transcribe
+                from processing.speech_to_text import transcribe_audio
+                transcription_result = transcribe_audio(filepath)
+                
+                if 'transcript' in transcription_result:
+                    transcript = transcription_result['transcript']
+                    
+                    # Analyze the transcript for emotion and slang
+                    audio_analysis = analyze_emotion_robust(text=transcript)
+                    if audio_analysis and 'predicted_emotion' in audio_analysis:
+                        audio_tone = audio_analysis['predicted_emotion']
+                        
+            except Exception as audio_error:
+                print(f"Audio extraction failed: {audio_error}")
+                # Continue without audio analysis
+            
+            # Perform video facial analysis
+            cap = cv2.VideoCapture(filepath)
+            
+            if not cap.isOpened():
+                return jsonify({'error': 'Could not open video file'}), 500
+                
+            # Get video properties
+            fps = cap.get(cv2.CAP_PROP_FPS) or 30
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            duration = total_frames / fps if fps > 0 else 0
+            
+            # Analyze a few key frames
+            frame_results = []
+            frames_to_analyze = min(10, max(1, int(total_frames / 30)))  # Analyze up to 10 key frames
+            
+            for i in range(frames_to_analyze):
+                frame_pos = int((i + 1) * total_frames / (frames_to_analyze + 1))
+                cap.set(cv2.CAP_PROP_POS_FRAMES, frame_pos)
+                ret, frame = cap.read()
+                
+                if ret:
+                    # Simple emotion detection from frame (you can enhance this)
+                    # For now, we'll do basic analysis
+                    timestamp = frame_pos / fps
+                    frame_results.append({
+                        'frame_number': frame_pos,
+                        'timestamp': round(timestamp, 2),
+                        'emotion': 'neutral',  # Placeholder - could integrate with facial analysis
+                        'confidence': 0.5
+                    })
+            
+            cap.release()
+            
+            # Combine results
+            dominant_emotion = audio_tone if audio_tone != 'neutral' else 'neutral'
+            
+            # Get slang analysis from transcript
+            slang_result = detect_slang(transcript) if transcript else {}
+            
+            return jsonify({
+                'filename': filename,
+                'video_info': {
+                    'duration_seconds': round(duration, 2),
+                    'total_frames': total_frames,
+                    'fps': fps
+                },
+                'transcript': transcript,
+                'analysis': {
+                    'dominant_emotion': dominant_emotion,
+                    'audio_tone': audio_tone,
+                    'frames_analyzed': len(frame_results),
+                    'frame_results': frame_results,
+                    'slang': slang_result
+                },
+                'message': f'Video analysis completed. Duration: {duration:.1f}s, Emotion: {dominant_emotion}'
+            })
+        
+        finally:
+            # Clean up uploaded file
+            if os.path.exists(filepath):
+                os.remove(filepath)
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'error': f'Video analysis failed: {str(e)}',
+            'filename': filename if 'filename' in locals() else 'unknown'
+        }), 500

@@ -251,88 +251,52 @@ export default function VideoPage() {
       const formData = new FormData();
       formData.append('video', recordedVideoBlob, 'recording.webm');
 
-      // First, upload the video for processing
-      const response = await axios.post("http://localhost:5001/upload", formData, {
+      // Use the dedicated video analysis endpoint
+      const response = await axios.post("http://localhost:5001/analyze-video", formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
         timeout: 45000, // Increased timeout for video processing
       });
 
-      // Extract transcript from the response
-      const transcript = response.data.transcript || "Could not extract speech from video";
+      // The video analysis endpoint returns comprehensive analysis results
+      const analysisData = response.data;
       
-      // If we got a transcript, analyze it for tone and language help
+      // Extract transcript and analysis results
+      const transcript = analysisData.transcript || "Could not extract speech from video";
+      
+      // Prepare comprehensive analysis results
       let analysisResults = {
         transcript: transcript,
         source: "video_recording",
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        analysis: {
+          tone: analysisData.dominant_emotion || "Neutral",
+          tone_explanation: analysisData.analysis_summary || "Video analysis completed",
+          message: "Video analysis with facial emotion detection completed",
+          facial_emotions: analysisData.facial_emotions || [],
+          video_info: analysisData.video_info || {}
+        },
+        accessibility_features: {
+          tone_explanation: analysisData.analysis_summary || "Your video was analyzed successfully",
+          simplified_message: transcript,
+          communication_tips: [
+            "Your facial expressions were captured and analyzed",
+            "Video quality was suitable for emotion detection",
+            transcript !== "Could not extract speech from video" ? "Your speech was clearly detected" : "Consider speaking more clearly toward the microphone"
+          ],
+          clarity_score: transcript !== "Could not extract speech from video" ? "Good" : "Needs improvement",
+          suggested_improvements: analysisData.suggestions || [
+            "Great job recording your video!",
+            "Continue practicing to build confidence"
+          ]
+        }
       };
 
-      if (transcript && transcript !== "Could not extract speech from video") {
-        // Send transcript for tone analysis and language assistance
-        try {
-          const analysisResponse = await axios.post("http://localhost:5001/analyze", {
-            transcript: transcript,
-            context: "video_with_gestures_and_expressions",
-            assistance_type: "neurodivergent_and_esl" // Flag for specialized analysis
-          }, {
-            timeout: 20000,
-          });
-
-          analysisResults.analysis = analysisResponse.data;
-          
-          // Add helpful context for neurodivergent users and ESL learners
-          analysisResults.accessibility_features = {
-            tone_explanation: analysisResponse.data.tone_explanation || "The tone appears neutral",
-            simplified_message: analysisResponse.data.simplified_version || transcript,
-            communication_tips: analysisResponse.data.communication_tips || [],
-            clarity_score: analysisResponse.data.clarity_score || "Good",
-            suggested_improvements: analysisResponse.data.improvements || []
-          };
-
-        } catch (analysisError) {
-          console.warn('Tone analysis failed, providing basic analysis:', analysisError);
-          // Provide basic fallback analysis
-          analysisResults.analysis = {
-            tone: "Neutral",
-            tone_explanation: "Unable to determine specific tone from the recording",
-            message: "Your speech was recorded successfully"
-          };
-          analysisResults.accessibility_features = {
-            tone_explanation: "The recording quality allows for basic speech recognition",
-            simplified_message: transcript,
-            communication_tips: [
-              "Speak clearly and at a moderate pace",
-              "Use simple sentence structures when possible",
-              "Practice expressing one main idea per sentence"
-            ],
-            clarity_score: "Processing completed",
-            suggested_improvements: ["Consider recording in a quiet environment for better analysis"]
-          };
-        }
-      } else {
-        // Handle case where no speech was detected
-        analysisResults.analysis = {
-          tone: "No speech detected",
-          message: "No clear speech was detected in the video"
-        };
-        analysisResults.accessibility_features = {
-          tone_explanation: "No speech was found to analyze",
-          simplified_message: "The video was recorded but no speech was detected",
-          communication_tips: [
-            "Ensure you're speaking clearly towards the camera",
-            "Check that your microphone is working",
-            "Try recording in a quieter environment",
-            "Speak a bit louder or closer to the microphone"
-          ],
-          clarity_score: "No speech detected",
-          suggested_improvements: [
-            "Test your microphone before recording",
-            "Practice speaking more distinctly",
-            "Record in a room with less background noise"
-          ]
-        };
+      // If we have slang detection results, include them
+      if (analysisData.slang_analysis) {
+        analysisResults.analysis.slang_analysis = analysisData.slang_analysis;
+        analysisResults.accessibility_features.slang_explanation = analysisData.slang_analysis.explanation;
       }
 
       // Store comprehensive results

@@ -28,6 +28,7 @@ multimodal_analyzer = MultimodalEmotionAnalyzer()
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff'}
 ALLOWED_AUDIO_EXTENSIONS = {'wav', 'mp3', 'flac', 'ogg', 'm4a'}
+ALLOWED_VIDEO_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv', 'webm'}
 
 def allowed_file(filename, extensions):
     """Check if the file extension is allowed."""
@@ -113,6 +114,156 @@ def analyze_image():
         return jsonify({
             'success': False,
             'error': f'Analysis failed: {str(e)}'
+        }), 500
+
+@facial_routes.route('/analyze-video', methods=['POST'])
+def analyze_video():
+    """Analyze facial emotion in uploaded video."""
+    try:
+        create_upload_folder()
+        
+        if 'video' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No video file provided'
+            }), 400
+        
+        file = request.files['video']
+        if file.filename == '':
+            return jsonify({
+                'success': False,
+                'error': 'No video file selected'
+            }), 400
+        
+        if not allowed_file(file.filename, ALLOWED_VIDEO_EXTENSIONS):
+            return jsonify({
+                'success': False,
+                'error': 'Invalid video file type. Supported formats: mp4, avi, mov, mkv, webm'
+            }), 400
+        
+        # Save uploaded file temporarily
+        filename = secure_filename(f"{uuid.uuid4()}_{file.filename}")
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+        
+        try:
+            # Extract frames from video and analyze each
+            import cv2
+            
+            cap = cv2.VideoCapture(filepath)
+            frame_results = []
+            frame_count = 0
+            max_frames = 30  # Analyze up to 30 frames
+            skip_frames = 10  # Skip frames to speed up processing
+            
+            fps = cap.get(cv2.CAP_PROP_FPS) or 30
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            
+            current_frame = 0
+            while cap.read()[0] and len(frame_results) < max_frames:
+                ret, frame = cap.read()
+                if not ret:
+                    break
+                
+                if current_frame % skip_frames == 0:
+                    # Save frame temporarily for analysis
+                    frame_filename = f"temp_frame_{current_frame}.jpg"
+                    frame_filepath = os.path.join(UPLOAD_FOLDER, frame_filename)
+                    cv2.imwrite(frame_filepath, frame)
+                    
+                    try:
+                        # Analyze this frame
+                        frame_analysis = multimodal_analyzer.analyze_facial_emotion(frame_filepath)
+                        
+                        if frame_analysis:
+                            timestamp = current_frame / fps
+                            frame_results.append({
+                                'frame_number': current_frame,
+                                'timestamp': round(timestamp, 2),
+                                'faces_detected': len(frame_analysis),
+                                'primary_emotion': frame_analysis[0]['emotion'],
+                                'confidence': round(frame_analysis[0]['confidence'], 4),
+                                'all_faces': [{
+                                    'emotion': face['emotion'],
+                                    'confidence': round(face['confidence'], 4),
+                                    'bounding_box': {
+                                        'x': int(face['bbox'][0]),
+                                        'y': int(face['bbox'][1]),
+                                        'width': int(face['bbox'][2]),
+                                        'height': int(face['bbox'][3])
+                                    }
+                                } for face in frame_analysis]
+                            })
+                    
+                    finally:
+                        # Clean up frame file
+                        if os.path.exists(frame_filepath):
+                            os.remove(frame_filepath)
+                
+                current_frame += 1
+            
+            cap.release()
+            
+            if not frame_results:
+                return jsonify({
+                    'success': True,
+                    'message': 'No faces detected in video',
+                    'video_info': {
+                        'total_frames': total_frames,
+                        'fps': fps,
+                        'duration_seconds': round(total_frames / fps, 2)
+                    },
+                    'analysis_results': {
+                        'frames_analyzed': 0,
+                        'faces_detected_total': 0,
+                        'dominant_emotion': 'none',
+                        'confidence': 0.0
+                    }
+                })
+            
+            # Aggregate results
+            all_emotions = [result['primary_emotion'] for result in frame_results]
+            all_confidences = [result['confidence'] for result in frame_results]
+            
+            # Find most common emotion
+            from collections import Counter
+            emotion_counts = Counter(all_emotions)
+            dominant_emotion = emotion_counts.most_common(1)[0][0]
+            
+            # Calculate average confidence for dominant emotion
+            dominant_confidences = [conf for emotion, conf in zip(all_emotions, all_confidences) 
+                                  if emotion == dominant_emotion]
+            avg_confidence = sum(dominant_confidences) / len(dominant_confidences)
+            
+            return jsonify({
+                'success': True,
+                'video_info': {
+                    'total_frames': total_frames,
+                    'fps': fps,
+                    'duration_seconds': round(total_frames / fps, 2)
+                },
+                'analysis_results': {
+                    'frames_analyzed': len(frame_results),
+                    'faces_detected_total': sum(r['faces_detected'] for r in frame_results),
+                    'dominant_emotion': dominant_emotion,
+                    'confidence': round(avg_confidence, 4),
+                    'emotion_distribution': dict(emotion_counts),
+                    'frame_by_frame': frame_results
+                },
+                'summary': f"Analyzed {len(frame_results)} frames. Dominant emotion: {dominant_emotion} ({avg_confidence:.1%} confidence)"
+            })
+            
+        finally:
+            # Clean up uploaded video file
+            if os.path.exists(filepath):
+                os.remove(filepath)
+    
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'Video analysis failed: {str(e)}'
         }), 500
 
 @facial_routes.route('/multimodal-analysis', methods=['POST'])
