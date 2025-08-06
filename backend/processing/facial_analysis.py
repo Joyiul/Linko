@@ -4,6 +4,8 @@ import cv2
 from tensorflow import keras
 from sklearn.preprocessing import LabelEncoder
 import os
+import pickle
+import glob
 
 class FacialFeatureAnalyzer:
     def __init__(self):
@@ -11,12 +13,14 @@ class FacialFeatureAnalyzer:
         self.model = None
         self.label_encoder = None
         self.model_loaded = False
+        self.img_height = 48
+        self.img_width = 48
         
     def load_model(self, model_path=None, encoder_path=None):
-        """Load pre-trained facial feature model"""
+        """Load pre-trained facial emotion model"""
         try:
             if model_path is None:
-                model_path = os.path.join(os.path.dirname(__file__), '..', 'models', 'trained', 'facial_model.h5')
+                model_path = os.path.join(os.path.dirname(__file__), '..', 'models', 'trained', 'facial_emotion_model.h5')
             if encoder_path is None:
                 encoder_path = os.path.join(os.path.dirname(__file__), '..', 'models', 'trained', 'facial_label_encoder.pkl')
             
@@ -40,7 +44,7 @@ class FacialFeatureAnalyzer:
             return False
     
     def extract_facial_features(self, image_path_or_array):
-        """Extract facial features from image"""
+        """Extract facial features from image (48x48 grayscale for emotion recognition)"""
         try:
             # Load image if path is provided
             if isinstance(image_path_or_array, str):
@@ -50,18 +54,18 @@ class FacialFeatureAnalyzer:
             else:
                 image = image_path_or_array
             
-            # Convert to RGB if needed
-            if len(image.shape) == 3 and image.shape[2] == 3:
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            # Convert to grayscale (matching training data)
+            if len(image.shape) == 3:
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             
-            # Resize to model input size (adjust based on your model requirements)
-            image_resized = cv2.resize(image, (224, 224))  # Common size for CNN models
+            # Resize to model input size (48x48 for emotion recognition)
+            image_resized = cv2.resize(image, (self.img_width, self.img_height))
             
             # Normalize pixel values
             image_normalized = image_resized.astype('float32') / 255.0
             
-            # Add batch dimension
-            image_batch = np.expand_dims(image_normalized, axis=0)
+            # Reshape for CNN (add batch and channel dimensions)
+            image_batch = image_normalized.reshape(1, self.img_height, self.img_width, 1)
             
             return image_batch
             
