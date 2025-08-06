@@ -59,7 +59,7 @@ export default function AnalysisPage() {
       <h2>Analysis Results</h2>
       
       {results.filename && (
-        <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#e8f4fd', borderRadius: '5px' }}>
+        <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#F8FBF8', borderRadius: '5px', border: '1px solid #C5E4C5' }}>
           <strong>📁 File:</strong> {results.filename}
         </div>
       )}
@@ -77,10 +77,10 @@ export default function AnalysisPage() {
         {/* Detailed Emotion Analysis */}
         {emotionAnalysis.detected_emotion && (
           <div style={{ 
-            backgroundColor: '#f8f9fa', 
+            backgroundColor: '#FFFFFF', 
             padding: '20px', 
             borderRadius: '10px',
-            border: '1px solid #dee2e6',
+            border: '1px solid #C5E4C5',
             marginBottom: '20px'
           }}>
             <h4 style={{ marginBottom: '15px' }}>🔍 Detailed Emotion Detection</h4>
@@ -132,9 +132,10 @@ export default function AnalysisPage() {
         {analysis.analysis_confidence && (
           <div style={{ 
             padding: '10px', 
-            backgroundColor: analysis.analysis_confidence === 'high' ? '#d4edda' : '#fff3cd',
+            backgroundColor: analysis.analysis_confidence === 'high' ? '#F8FBF8' : '#FDFEFE',
             borderRadius: '5px',
-            marginBottom: '20px'
+            marginBottom: '20px',
+            border: '1px solid #C5E4C5'
           }}>
             <strong>Analysis Quality:</strong> {analysis.analysis_confidence} 
             {analysis.transcript_length && ` (${analysis.transcript_length} words)`}
@@ -147,9 +148,9 @@ export default function AnalysisPage() {
         {results.transcript ? (
           <div style={{ 
             padding: '15px', 
-            backgroundColor: '#f8f9fa', 
+            backgroundColor: '#FFFFFF', 
             borderRadius: '5px',
-            border: '1px solid #dee2e6',
+            border: '1px solid #C5E4C5',
             fontStyle: 'italic'
           }}>
             <HighlightedText text={results.transcript} />
@@ -165,9 +166,10 @@ export default function AnalysisPage() {
           <ul style={{ 
             listStyle: 'none', 
             padding: 0,
-            backgroundColor: '#fff3cd',
+            backgroundColor: '#F8FBF8',
             borderRadius: '5px',
-            padding: '15px'
+            padding: '15px',
+            border: '1px solid #C5E4C5'
           }}>
             {Object.entries(analysis.slang || results.slang || {}).map(([word, meaning]) => (
               <li key={word} style={{ 
@@ -177,7 +179,7 @@ export default function AnalysisPage() {
                 borderRadius: '3px',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
               }}>
-                <strong style={{ color: '#d63384' }}>"{word}"</strong> → {meaning}
+                <strong style={{ color: '#A8D8A8' }}>"{word}"</strong> → {meaning}
               </li>
             ))}
           </ul>
@@ -186,8 +188,9 @@ export default function AnalysisPage() {
             color: '#666', 
             fontStyle: 'italic',
             padding: '15px',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '5px'
+            backgroundColor: '#FFFFFF',
+            borderRadius: '5px',
+            border: '1px solid #C5E4C5'
           }}>
             No slang terms detected in this text
           </p>
@@ -199,7 +202,8 @@ export default function AnalysisPage() {
           onClick={() => window.location.href = '/listen'} 
           style={{
             padding: '12px 24px',
-            backgroundColor: '#007bff',
+            backgroundColor: 'linear-gradient(135deg, #87CEEB 0%, #B0DCEB 100%)',
+            background: '#87CEEB',
             color: 'white',
             border: 'none',
             borderRadius: '5px',

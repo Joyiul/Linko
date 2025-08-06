@@ -627,12 +627,12 @@ export default function VideoPage() {
       padding: 20, 
       maxWidth: 800, 
       margin: '0 auto',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, #F8FBF8 0%, #FDFEFE 100%)',
       minHeight: '100vh',
-      color: 'white'
+      color: '#333333'
     }}>
-      <h2 style={{ textAlign: 'center', marginBottom: 30 }}>Communication Practice & Analysis</h2>
-      <p style={{ textAlign: 'center', marginBottom: 30, fontSize: 16, lineHeight: 1.5 }}>
+      <h2 style={{ textAlign: 'center', marginBottom: 30, color: '#666666' }}>Communication Practice & Analysis</h2>
+      <p style={{ textAlign: 'center', marginBottom: 30, fontSize: 16, lineHeight: 1.5, color: '#666666' }}>
         Practice speaking with confidence! Record yourself and get helpful feedback on your communication style, 
         tone, and clarity. Perfect for English learners, neurodivergent individuals, or anyone wanting to improve their communication.
       </p>
@@ -670,7 +670,7 @@ export default function VideoPage() {
             onClick={startCamera}
             style={{
               padding: '15px 30px',
-              background: '#3498db',
+              background: 'linear-gradient(135deg, #87CEEB 0%, #B0DCEB 100%)',
               color: 'white',
               border: 'none',
               borderRadius: 25,
@@ -695,7 +695,7 @@ export default function VideoPage() {
             background: '#2c3e50',
             borderRadius: 12,
             overflow: 'hidden',
-            border: isRecording ? '3px solid #e74c3c' : '3px solid #34495e'
+            border: isRecording ? '3px solid #A8D8A8' : '3px solid #C5E4C5'
           }}>
             <video
               ref={videoRef}
@@ -712,7 +712,7 @@ export default function VideoPage() {
                 position: 'absolute',
                 top: 15,
                 right: 15,
-                background: '#e74c3c',
+                background: '#A8D8A8',
                 color: 'white',
                 padding: '8px 12px',
                 borderRadius: 6,
@@ -768,7 +768,7 @@ export default function VideoPage() {
               }}
               style={{
                 padding: '15px 30px',
-                background: '#e74c3c',
+                background: 'linear-gradient(135deg, #A8D8A8 0%, #C5E4C5 100%)',
                 color: 'white',
                 border: 'none',
                 borderRadius: 25,
@@ -898,15 +898,15 @@ export default function VideoPage() {
         <div style={{
           width: '100%',
           maxWidth: 640,
-          background: 'rgba(255,255,255,0.1)',
+          background: 'rgba(168, 216, 168, 0.1)',
           borderRadius: 12,
           padding: 20,
           marginTop: 30
         }}>
-          <h3 style={{ textAlign: 'center', marginBottom: 20, color: 'white' }}>
+          <h3 style={{ textAlign: 'center', marginBottom: 20, color: '#666666' }}>
             Voice Practice & Feedback
           </h3>
-          <p style={{ textAlign: 'center', marginBottom: 15, fontSize: 14, color: 'rgba(255,255,255,0.9)' }}>
+          <p style={{ textAlign: 'center', marginBottom: 15, fontSize: 14, color: '#666666' }}>
             Practice speaking and get personalized feedback on your tone, clarity, and communication style
           </p>
           

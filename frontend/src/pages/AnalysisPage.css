@@ -1,7 +1,7 @@
 .analysis-container {
   padding: 32px;
-  background: #f0f4ff;
-  color: #222;
+  background: linear-gradient(135deg, #F8FBF8 0%, #FDFEFE 100%);
+  color: #333333;
   min-height: 100vh;
   font-family: 'Inter', Arial, sans-serif;
 }
@@ -10,14 +10,14 @@
   margin-top: 0;
   font-size: 2rem;
   font-weight: 700;
-  color: #2a3a5e;
+  color: #666666;
 }
 
 .analysis-container h4 {
   margin-bottom: 8px;
   margin-top: 24px;
   font-size: 1.1rem;
-  color: #4f8cff;
+  color: #A8D8A8;
   font-weight: 600;
 }
 
@@ -32,8 +32,8 @@
 }
 
 .analysis-container strong {
-  color: #222;
-  background: #e3eaff;
+  color: #333333;
+  background: #F8FBF8;
   padding: 2px 6px;
   border-radius: 4px;
 }

@@ -151,7 +151,9 @@ export default function ListeningPage() {
 
   return (
     <div className="listening-container">
-      <h2 className="listening-title">Audio Analysis & Slang Detection</h2>
+            <h2 style={{ textAlign: 'center', marginBottom: 30, color: '#666666' }}>
+        Audio Analysis & Slang Detection
+      </h2>
       
       {error && (
         <div className="error-message" style={{
@@ -179,13 +181,14 @@ export default function ListeningPage() {
             onClick={() => setActiveTab("upload")}
             style={{
               padding: '12px 24px',
-              backgroundColor: activeTab === "upload" ? '#007bff' : 'transparent',
-              color: activeTab === "upload" ? 'white' : '#007bff',
+              backgroundColor: activeTab === "upload" ? '#A8D8A8' : 'transparent',
+              color: activeTab === "upload" ? 'white' : '#A8D8A8',
               border: 'none',
-              borderBottom: activeTab === "upload" ? '3px solid #007bff' : '3px solid transparent',
+              borderBottom: activeTab === "upload" ? '3px solid #A8D8A8' : '3px solid transparent',
               cursor: 'pointer',
               fontSize: '16px',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              borderRadius: '8px 8px 0 0'
             }}
           >
             Upload File
@@ -194,13 +197,14 @@ export default function ListeningPage() {
             onClick={() => setActiveTab("record")}
             style={{
               padding: '12px 24px',
-              backgroundColor: activeTab === "record" ? '#007bff' : 'transparent',
-              color: activeTab === "record" ? 'white' : '#007bff',
+              backgroundColor: activeTab === "record" ? '#A8D8A8' : 'transparent',
+              color: activeTab === "record" ? 'white' : '#A8D8A8',
               border: 'none',
-              borderBottom: activeTab === "record" ? '3px solid #007bff' : '3px solid transparent',
+              borderBottom: activeTab === "record" ? '3px solid #A8D8A8' : '3px solid transparent',
               cursor: 'pointer',
               fontSize: '16px',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              borderRadius: '8px 8px 0 0'
             }}
           >
             Record Audio
@@ -209,13 +213,14 @@ export default function ListeningPage() {
             onClick={() => setActiveTab("text")}
             style={{
               padding: '12px 24px',
-              backgroundColor: activeTab === "text" ? '#007bff' : 'transparent',
-              color: activeTab === "text" ? 'white' : '#007bff',
+              backgroundColor: activeTab === "text" ? '#A8D8A8' : 'transparent',
+              color: activeTab === "text" ? 'white' : '#A8D8A8',
               border: 'none',
-              borderBottom: activeTab === "text" ? '3px solid #007bff' : '3px solid transparent',
+              borderBottom: activeTab === "text" ? '3px solid #A8D8A8' : '3px solid transparent',
               cursor: 'pointer',
               fontSize: '16px',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              borderRadius: '8px 8px 0 0'
             }}
           >
             Enter Text
@@ -229,7 +234,7 @@ export default function ListeningPage() {
           <div className="upload-area" style={{ 
             textAlign: 'center', 
             padding: '40px', 
-            border: '2px dashed #007bff', 
+            border: '2px dashed #A8D8A8', 
             borderRadius: '10px',
             backgroundColor: '#f8f9fa'
           }}>
@@ -326,27 +331,27 @@ export default function ListeningPage() {
           disabled={loading || (!file && !recordedBlob && !transcript.trim())}
           style={{
             padding: '20px 40px',
-            backgroundColor: loading ? '#6c757d' : '#ff6b35',
+            backgroundColor: loading ? '#6c757d' : '#A8D8A8',
             color: 'white',
             border: 'none',
             borderRadius: '50px',
             cursor: loading ? 'not-allowed' : 'pointer',
             fontSize: '20px',
             fontWeight: 'bold',
-            boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)',
+            boxShadow: '0 4px 15px rgba(168, 216, 168, 0.3)',
             transform: loading ? 'none' : 'scale(1)',
             transition: 'all 0.3s ease'
           }}
           onMouseOver={(e) => {
             if (!loading) {
               e.target.style.transform = 'scale(1.05)';
-              e.target.style.boxShadow = '0 6px 20px rgba(255, 107, 53, 0.4)';
+              e.target.style.boxShadow = '0 6px 20px rgba(168, 216, 168, 0.4)';
             }
           }}
           onMouseOut={(e) => {
             if (!loading) {
               e.target.style.transform = 'scale(1)';
-              e.target.style.boxShadow = '0 4px 15px rgba(255, 107, 53, 0.3)';
+              e.target.style.boxShadow = '0 4px 15px rgba(168, 216, 168, 0.3)';
             }
           }}
         >
@@ -356,7 +361,7 @@ export default function ListeningPage() {
         {loading && (
           <div style={{ 
             marginTop: '15px', 
-            color: '#007bff',
+            color: '#A8D8A8',
             fontSize: '16px',
             fontWeight: 'bold'
           }}>

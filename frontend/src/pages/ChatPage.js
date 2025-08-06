@@ -233,8 +233,7 @@ export default function ChatPage() {
   return (
     <div className="chat-container">
       <div className="chat-header">
-        <h2>🤖 Language Learning Assistant</h2>
-        <p>Send me any English phrase and I'll explain its meaning, tone, slang, and cultural context!</p>
+        <h2>Language Learning Assistant</h2>
       </div>
 
       <div className="messages-container">

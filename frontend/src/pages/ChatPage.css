@@ -5,25 +5,27 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+  background: linear-gradient(135deg, #F8FBF8 0%, #FDFEFE 100%);
 }
 
 .chat-header {
   text-align: center;
   margin-bottom: 20px;
-  color: white;
+  color: #333333;
 }
 
 .chat-header h2 {
   margin: 0 0 10px 0;
   font-size: 28px;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  color: #666666;
 }
 
 .chat-header p {
   margin: 0;
-  opacity: 0.9;
+  opacity: 0.8;
   font-size: 16px;
+  color: #666666;
 }
 
 .messages-container {
@@ -71,16 +73,16 @@
 }
 
 .user-message .message-content {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  background: linear-gradient(135deg, #A8D8A8 0%, #C5E4C5 100%);
   color: white;
   border-bottom-right-radius: 5px;
 }
 
 .bot-message .message-content {
-  background: #f1f3f4;
+  background: #FFFFFF;
   color: #333;
   border-bottom-left-radius: 5px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #C5E4C5;
 }
 
 .message-text {
@@ -260,7 +262,7 @@
 
 .chat-input {
   flex: 1;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #C5E4C5;
   border-radius: 25px;
   padding: 12px 20px;
   font-size: 16px;
@@ -271,8 +273,8 @@
 }
 
 .chat-input:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #A8D8A8;
+  box-shadow: 0 0 0 3px rgba(168, 216, 168, 0.1);
 }
 
 .chat-input:disabled {
@@ -281,7 +283,7 @@
 }
 
 .send-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #87CEEB 0%, #B0DCEB 100%);
   color: white;
   border: none;
   border-radius: 50%;
@@ -297,7 +299,7 @@
 
 .send-button:hover:not(:disabled) {
   transform: scale(1.1);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 5px 15px rgba(135, 206, 235, 0.4);
 }
 
 .send-button:disabled {
@@ -310,7 +312,7 @@
   display: flex;
   gap: 20px;
   font-size: 14px;
-  color: #666;
+  color: #666666;
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -354,12 +356,12 @@
 }
 
 .messages-container::-webkit-scrollbar-thumb {
-  background: rgba(102, 126, 234, 0.5);
+  background: rgba(168, 216, 168, 0.5);
   border-radius: 3px;
 }
 
 .messages-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(102, 126, 234, 0.7);
+  background: rgba(168, 216, 168, 0.7);
 }
 
 /* Mobile responsiveness */
