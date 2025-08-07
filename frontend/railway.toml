@@ -1,0 +1,11 @@
+# Railway configuration for frontend
+[build]
+command = "npm ci && npm run build"
+
+[deploy]
+startCommand = "npx serve -s build -l $PORT"
+healthcheckPath = "/"
+healthcheckTimeout = 100
+
+[env]
+REACT_APP_API_URL = "${{backend.RAILWAY_PUBLIC_DOMAIN}}"

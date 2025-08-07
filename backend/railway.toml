@@ -1,0 +1,13 @@
+# Railway configuration for backend
+[build]
+command = "pip install -r requirements.txt"
+
+[deploy]
+startCommand = "python app.py"
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+
+[env]
+FLASK_ENV = "production"
+PYTHONPATH = "/app"
