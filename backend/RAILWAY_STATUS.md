@@ -30,7 +30,7 @@ Railway can't detect your app because you have both `backend/` and `frontend/` f
 5. **Service Settings**:
    - **Name**: `immigrantslangster-frontend`
    - **Root Directory**: `/frontend`
-   - **Build Command**: `npm ci && npm run build`
+   - **Build Command**: `npm install && npm run build`
    - **Start Command**: `npx serve -s build -l $PORT`
 
 6. **Environment Variables**:
