@@ -18,41 +18,56 @@ class RobustEmotionAnalyzer:
         self.audio_model = None
         self.audio_encoder = None
         
-        # Define emotion mappings
+        # Define emotion mappings with enhanced patterns
         self.emotion_patterns = {
-            'angry': {
-                'keywords': ['angry', 'mad', 'furious', 'rage', 'hate', 'damn', 'annoyed', 'irritated', 'pissed'],
-                'phrases': ['fed up', 'had enough', 'so angry', 'really mad', 'totally pissed'],
-                'intensity_words': ['extremely', 'very', 'really', 'so', 'totally']
-            },
             'happy': {
-                'keywords': ['happy', 'joy', 'excited', 'amazing', 'wonderful', 'great', 'awesome', 'fantastic'],
-                'phrases': ['so happy', 'feel great', 'love this', 'amazing day', 'feeling wonderful'],
-                'intensity_words': ['extremely', 'very', 'really', 'so', 'absolutely']
+                'keywords': ['happy', 'joy', 'joyful', 'wonderful', 'great', 'awesome', 'fantastic', 'love', 'smile', 'glad', 'cheerful', 'delighted', 'content'],
+                'phrases': ["i'm so happy", "so happy", "really happy", "very happy", "feel great", "feeling good", "love this", "this is great", "makes me happy"],
+                'intensity_words': ['extremely', 'very', 'really', 'so', 'absolutely', 'super', 'totally', 'incredibly']
+            },
+            'excited': {
+                'keywords': ['excited', 'thrilled', 'ecstatic', 'exhilarated', 'pumped', 'stoked', 'hyped', 'enthusiastic', 'eager'],
+                'phrases': ["i'm so excited", "so excited", "really excited", "very excited", "can't wait", "so pumped", "really thrilled", "absolutely thrilled"],
+                'intensity_words': ['extremely', 'very', 'really', 'so', 'absolutely', 'super', 'totally', 'incredibly']
+            },
+            'angry': {
+                'keywords': ['angry', 'mad', 'furious', 'rage', 'hate', 'damn', 'annoyed', 'irritated', 'pissed', 'frustrated', 'livid', 'frustrating'],
+                'phrases': ['fed up', 'had enough', 'so angry', 'really mad', 'totally pissed', "i'm angry", "makes me angry", "pissed off", "so frustrating", "really frustrating"],
+                'intensity_words': ['extremely', 'very', 'really', 'so', 'totally', 'absolutely']
             },
             'sad': {
-                'keywords': ['sad', 'depressed', 'down', 'hurt', 'pain', 'lonely', 'miserable', 'upset'],
-                'phrases': ['feeling down', 'so sad', 'really hurt', 'feel terrible', 'quite depressed'],
-                'intensity_words': ['very', 'really', 'extremely', 'quite', 'so']
-            },
-            'fear': {
-                'keywords': ['scared', 'afraid', 'fear', 'nervous', 'anxious', 'worried', 'panic', 'terrified'],
-                'phrases': ['so scared', 'really afraid', 'quite nervous', 'very anxious', 'totally terrified'],
+                'keywords': ['sad', 'depressed', 'down', 'hurt', 'pain', 'lonely', 'miserable', 'upset', 'heartbroken', 'devastated'],
+                'phrases': ['feeling down', 'so sad', 'really hurt', 'feel terrible', 'quite depressed', "i'm sad", "makes me sad", "feel awful"],
                 'intensity_words': ['very', 'really', 'extremely', 'quite', 'so', 'totally']
             },
+            'disappointed': {
+                'keywords': ['disappointed', 'disappointment', 'let down', 'dissatisfied', 'unfulfilled', 'disillusioned', 'underwhelmed'],
+                'phrases': ['so disappointed', 'really disappointed', 'let me down', 'quite disappointed', 'feel disappointed', "i'm disappointed", "such a disappointment"],
+                'intensity_words': ['very', 'really', 'extremely', 'quite', 'so', 'totally']
+            },
+            'fear': {
+                'keywords': ['scared', 'afraid', 'fear', 'nervous', 'anxious', 'worried', 'panic', 'terrified', 'frightened', 'alarmed'],
+                'phrases': ['so scared', 'really afraid', 'quite nervous', 'very anxious', 'totally terrified', "i'm scared", "makes me nervous"],
+                'intensity_words': ['very', 'really', 'extremely', 'quite', 'so', 'totally']
+            },
+            'interest': {
+                'keywords': ['interested', 'curious', 'intrigued', 'fascinating', 'wonder', 'wondering', 'interesting', 'compelling', 'captivating', 'intriguing'],
+                'phrases': ['so interesting', 'really curious', 'quite intrigued', 'very interesting', 'makes me wonder', "i'm curious", "find it interesting", "want to know"],
+                'intensity_words': ['very', 'really', 'quite', 'so', 'extremely', 'totally']
+            },
             'disgust': {
-                'keywords': ['disgusting', 'gross', 'sick', 'revolting', 'awful', 'horrible', 'nasty'],
-                'phrases': ['so gross', 'really disgusting', 'quite awful', 'totally sick'],
+                'keywords': ['disgusting', 'gross', 'sick', 'revolting', 'awful', 'horrible', 'nasty', 'yuck', 'ew', 'disgusted'],
+                'phrases': ['so gross', 'really disgusting', 'quite awful', 'totally sick', "makes me sick", "that's disgusting"],
                 'intensity_words': ['very', 'really', 'extremely', 'quite', 'so', 'totally']
             },
             'surprise': {
-                'keywords': ['wow', 'amazing', 'unbelievable', 'shocked', 'surprised', 'incredible'],
-                'phrases': ['oh wow', 'so surprised', 'really amazing', 'quite shocking', 'totally unexpected'],
+                'keywords': ['wow', 'amazing', 'unbelievable', 'shocked', 'surprised', 'incredible', 'astonishing', 'unexpected', 'stunned'],
+                'phrases': ['oh wow', 'so surprised', 'really amazing', 'quite shocking', 'totally unexpected', "can't believe", "so unexpected"],
                 'intensity_words': ['very', 'really', 'extremely', 'quite', 'so', 'totally']
             },
             'neutral': {
-                'keywords': ['okay', 'fine', 'normal', 'regular', 'standard', 'typical'],
-                'phrases': ['it is', 'according to', 'based on', 'in general'],
+                'keywords': ['okay', 'fine', 'normal', 'regular', 'standard', 'typical', 'according', 'based', 'generally'],
+                'phrases': ['it is', 'according to', 'based on', 'in general', 'as usual', 'nothing special'],
                 'intensity_words': []
             }
         }
@@ -118,59 +133,90 @@ class RobustEmotionAnalyzer:
         print("Creating fallback encoder for audio emotions...")
     
     def analyze_text_robust(self, text):
-        """Robust text-based emotion analysis"""
+        """Robust text-based emotion analysis with improved sensitivity"""
         if not text or not text.strip():
             return {'emotion': 'neutral', 'confidence': 0.3}
         
         text_lower = text.lower()
         
-        # VADER sentiment analysis
+        # VADER sentiment analysis for baseline
         vader_scores = self.text_analyzer.polarity_scores(text)
         
-        # Pattern-based emotion scoring
+        # Enhanced pattern-based emotion scoring
         emotion_scores = {}
         for emotion, patterns in self.emotion_patterns.items():
             score = 0
             
-            # Keyword matching
+            # Direct keyword matching with higher sensitivity
             for keyword in patterns['keywords']:
                 if keyword in text_lower:
-                    score += 1
+                    score += 3  # Increased base score
             
-            # Phrase matching (weighted higher)
+            # Phrase matching (weighted much higher for complete expressions)
             for phrase in patterns['phrases']:
                 if phrase in text_lower:
-                    score += 2
+                    score += 8  # Much higher score for complete phrases
             
-            # Intensity modifiers
+            # Personal statements ("I'm happy", "I feel", etc.)
+            personal_indicators = [
+                f"i'm {keyword}" for keyword in patterns['keywords'][:8]  # Top keywords
+            ] + [
+                f"i feel {keyword}" for keyword in patterns['keywords'][:5]
+            ] + [
+                f"feeling {keyword}" for keyword in patterns['keywords'][:5]
+            ]
+            
+            for personal in personal_indicators:
+                if personal in text_lower:
+                    score += 10  # Very high score for personal emotional statements
+            
+            # Intensity modifiers - check for proximity to keywords
             for keyword in patterns['keywords']:
                 if keyword in text_lower:
                     for intensity in patterns['intensity_words']:
-                        # Check if intensity word is near the emotion keyword
-                        if intensity in text_lower:
-                            keyword_pos = text_lower.find(keyword)
-                            intensity_pos = text_lower.find(intensity)
-                            if abs(keyword_pos - intensity_pos) < 30:  # Within 30 characters
-                                score += 1
+                        # Check various intensity patterns
+                        intensity_patterns = [
+                            f"{intensity} {keyword}",
+                            f"i'm {intensity} {keyword}",
+                            f"feel {intensity} {keyword}",
+                            f"{keyword} {intensity}"  # Sometimes comes after
+                        ]
+                        for pattern in intensity_patterns:
+                            if pattern in text_lower:
+                                score += 5  # Bonus for intensity
+            
+            # Special handling for exclamation marks and caps (emotional indicators)
+            if '!' in text and emotion != 'neutral':
+                excitement_keywords = [kw for kw in patterns['keywords'] if kw in text_lower]
+                if excitement_keywords:
+                    score += len([c for c in text if c == '!']) * 2  # Bonus per exclamation
             
             emotion_scores[emotion] = score
         
-        # Determine primary emotion
+        # Determine primary emotion with improved logic
         max_score = max(emotion_scores.values()) if emotion_scores else 0
         
         if max_score > 0:
             primary_emotion = max(emotion_scores, key=emotion_scores.get)
-            confidence = min(max_score * 0.2, 0.9)
+            # Calculate confidence based on score strength
+            confidence = min(max_score * 0.08, 0.95)  # Adjusted scaling
+            
+            # Ensure minimum confidence for clear emotional expressions
+            if max_score >= 8:  # Strong emotional indicators
+                confidence = max(confidence, 0.7)
+            elif max_score >= 3:  # Moderate indicators
+                confidence = max(confidence, 0.5)
+            
         else:
-            # Fall back to VADER sentiment
+            # Enhanced VADER fallback for edge cases
             compound = vader_scores.get('compound', 0)
             if compound >= 0.5:
                 primary_emotion = 'happy'
-                confidence = min(compound, 0.8)
+                confidence = min(compound * 0.8, 0.75)
             elif compound <= -0.5:
                 primary_emotion = 'sad'
-                confidence = min(abs(compound), 0.8)
-            elif vader_scores.get('neu', 0) > 0.7:
+                confidence = min(abs(compound) * 0.8, 0.75)
+            elif vader_scores.get('neu', 0) > 0.8:
                 primary_emotion = 'neutral'
                 confidence = 0.6
             else:
@@ -183,7 +229,9 @@ class RobustEmotionAnalyzer:
             'details': {
                 'vader_scores': vader_scores,
                 'emotion_scores': emotion_scores,
-                'method': 'pattern_matching' if max_score > 0 else 'vader_fallback'
+                'max_score': max_score,
+                'method': 'enhanced_pattern_matching' if max_score > 0 else 'vader_fallback',
+                'text_length': len(text.split())
             }
         }
     

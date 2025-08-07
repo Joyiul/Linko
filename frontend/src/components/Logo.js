@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-const Logo = ({ size = 'medium', showText = false, className = '' }) => {
+const Logo = ({ size = 'medium', showText = false, className = '', animated = false }) => {
+  const [hovered, setHovered] = useState(false);
+  
   const sizes = {
-    small: { width: 32, height: 32 },
-    medium: { width: 40, height: 40 },
-    large: { width: 48, height: 48 },
-    xlarge: { width: 56, height: 56 }
+    small: { width: 50, height: 50 },
+    medium: { width: 80, height: 80 },
+    large: { width: 100, height: 100 },
+    xlarge: { width: 150, height: 150 },
+    hero: { width: 250, height: 250 } // Increased from 200 to 250
   };
 
   const currentSize = sizes[size] || sizes.medium;
@@ -16,106 +19,49 @@ const Logo = ({ size = 'medium', showText = false, className = '' }) => {
       style={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        position: 'relative'
       }}
     >
-      {/* Earth icon as semi-circle with flat bottom */}
-      <div
-        style={{
-          width: currentSize.width,
-          height: currentSize.height / 2,
-          borderRadius: `${currentSize.width}px ${currentSize.width}px 0 0`,
-          background: '#87CEEB', // Sky blue base
-          border: '3px solid #666666',
-          borderBottom: '3px solid #666666',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-          boxShadow: '2px 2px 6px rgba(0,0,0,0.15)',
-          overflow: 'hidden'
-        }}
-      >
-        {/* Green landmasses - adjusted for semi-circle */}
-        {/* Left landmass */}
-        <div style={{
-          position: 'absolute',
-          left: '15%',
-          top: '10%',
-          width: '35%',
-          height: '60%',
-          background: '#A8D8A8',
-          borderRadius: '50% 40% 60% 30%',
-          transform: 'rotate(-15deg)'
-        }} />
+      {/* AI Assistant as semi-circle with tech/AI aesthetic */}
+      {/* Your Uploaded Earth Image - Clean & Simple */}
+      <div style={{
+        width: `${currentSize.width}px`,
+        height: `${currentSize.height}px`,
+        position: 'relative',
+        cursor: hovered ? 'pointer' : 'default',
+        transform: hovered ? 'scale(1.05) translateY(-3px)' : 'scale(1)',
+        transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}>
         
-        {/* Right landmass */}
-        <div style={{
-          position: 'absolute',
-          right: '10%',
-          top: '20%',
-          width: '25%',
-          height: '45%',
-          background: '#A8D8A8',
-          borderRadius: '40% 50% 30% 60%',
-          transform: 'rotate(20deg)'
-        }} />
-        
-        {/* Bottom landmass */}
-        <div style={{
-          position: 'absolute',
-          bottom: '5%',
-          left: '30%',
-          width: '40%',
-          height: '35%',
-          background: '#A8D8A8',
-          borderRadius: '60% 30% 50% 40%',
-          transform: 'rotate(-10deg)'
-        }} />
-        
-        {/* Cute face overlay - adjusted for semi-circle */}
-        <div style={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 10
-        }}>
-          {/* Eyes */}
-          <div style={{
-            position: 'absolute',
-            top: '25%',
-            left: '32%',
-            width: '4px',
-            height: '4px',
-            borderRadius: '50%',
-            backgroundColor: '#333333'
-          }} />
-          <div style={{
-            position: 'absolute',
-            top: '25%',
-            right: '32%',
-            width: '4px',
-            height: '4px',
-            borderRadius: '50%',
-            backgroundColor: '#333333'
-          }} />
-          
-          {/* Small heart-shaped smile */}
-          <div style={{
-            position: 'absolute',
-            bottom: '25%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            fontSize: '8px',
-            color: '#333333'
-          }}>
-            ♡
-          </div>
-        </div>
+        <img 
+          src="/earth-logo.png" 
+          alt="Linko Earth AI Assistant"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block'
+          }}
+        />
       </div>
+
+      {/* Text label if requested */}
+      {showText && (
+        <div style={{
+          marginTop: '10px',
+          fontSize: `${currentSize.width / 8}px`,
+          fontWeight: 'bold',
+          color: '#4A5568',
+          textAlign: 'center'
+        }}>
+          Linko AI
+        </div>
+      )}
+
+      {/* No animations needed - clean and simple */}
     </div>
   );
 };

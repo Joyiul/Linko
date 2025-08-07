@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { theme } from '../theme';
 
 export default function VoiceRecorder({ onRecordingComplete }) {
   const [isRecording, setIsRecording] = useState(false);
@@ -58,70 +59,99 @@ export default function VoiceRecorder({ onRecordingComplete }) {
         </div>
       )}
       
-      <div style={{ marginBottom: '15px' }}>
+            <div style={{ marginBottom: theme.spacing.md }}>
         {!isRecording ? (
           <button
             onClick={startRecording}
             style={{
-              backgroundColor: '#dc3545',
-              color: 'white',
+              ...theme.typography.button,
+              backgroundColor: theme.colors.primary,
+              color: theme.colors.onPrimary,
               border: 'none',
-              borderRadius: '50px',
-              padding: '15px 25px',
+              borderRadius: theme.borderRadius.bubble,
+              padding: theme.spacing.md + ' ' + theme.spacing.lg,
               fontSize: '18px',
+              fontWeight: '600',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               margin: '0 auto',
-              gap: '10px'
+              gap: theme.spacing.sm,
+              boxShadow: theme.shadows.bubble,
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = theme.shadows.heavy;
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = theme.shadows.bubble;
             }}
           >
-            Start Recording
+            🎤 Start Recording
           </button>
         ) : (
           <button
             onClick={stopRecording}
             style={{
-              backgroundColor: '#6c757d',
-              color: 'white',
+              ...theme.typography.button,
+              backgroundColor: theme.colors.error,
+              color: theme.colors.onPrimary,
               border: 'none',
-              borderRadius: '50px',
-              padding: '15px 25px',
+              borderRadius: theme.borderRadius.bubble,
+              padding: theme.spacing.md + ' ' + theme.spacing.lg,
               fontSize: '18px',
+              fontWeight: '600',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               margin: '0 auto',
-              gap: '10px',
-              animation: 'pulse 1.5s infinite'
+              gap: theme.spacing.sm,
+              boxShadow: theme.shadows.bubble,
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = theme.shadows.heavy;
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = theme.shadows.bubble;
             }}
           >
-            Stop Recording
+            🛑 Stop Recording
           </button>
         )}
       </div>
 
       {isRecording && (
         <div style={{ 
-          color: '#dc3545', 
-          fontWeight: 'bold',
-          animation: 'pulse 1s infinite'
+          color: theme.colors.error, 
+          fontWeight: '600',
+          fontFamily: theme.typography.fontFamily,
+          animation: 'pulse 1s infinite',
+          textAlign: 'center',
+          marginTop: theme.spacing.sm
         }}>
-          Recording in progress...
+          🔴 Recording in progress...
         </div>
       )}
 
       {recordedBlob && !isRecording && (
         <div style={{ 
-          marginTop: '15px', 
-          padding: '10px', 
-          backgroundColor: '#d4edda', 
-          borderRadius: '5px',
-          color: '#155724'
+          marginTop: theme.spacing.md, 
+          padding: theme.spacing.sm, 
+          backgroundColor: theme.colors.primaryLight, 
+          borderRadius: theme.borderRadius.medium,
+          color: theme.colors.primary,
+          textAlign: 'center',
+          fontFamily: theme.typography.fontFamily,
+          fontWeight: '500'
         }}>
-          Recording completed! Ready to decipher.
+          ✅ Recording completed! Ready to decipher.
         </div>
       )}
 

@@ -42,37 +42,50 @@ export const theme = {
   },
   
   typography: {
-    fontFamily: '"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif',
+    // Match Learning Library font stack exactly
+    fontFamily: '"Poppins", "Nunito", "Circular", sans-serif',
     h1: {
       fontSize: '2.5rem',
-      fontWeight: 'bold',
-      letterSpacing: '-0.025em'
+      fontWeight: '600',
+      letterSpacing: '0.5px',
+      fontFamily: '"Poppins", "Nunito", "Circular", sans-serif'
     },
     h2: {
       fontSize: '2rem',
-      fontWeight: 'bold',
-      letterSpacing: '-0.025em'
+      fontWeight: '600',
+      letterSpacing: '0.5px',
+      fontFamily: '"Poppins", "Nunito", "Circular", sans-serif'
     },
     h3: {
       fontSize: '1.5rem',
       fontWeight: '600',
-      letterSpacing: '-0.025em'
+      letterSpacing: '0.5px',
+      fontFamily: '"Poppins", "Nunito", "Circular", sans-serif'
+    },
+    h4: {
+      fontSize: '1.25rem',
+      fontWeight: '600',
+      letterSpacing: '0.5px',
+      fontFamily: '"Poppins", "Nunito", "Circular", sans-serif'
     },
     body1: {
       fontSize: '1rem',
       fontWeight: '400',
-      lineHeight: 1.5
+      lineHeight: 1.6,
+      fontFamily: '"Poppins", "Nunito", "Circular", sans-serif'
     },
     body2: {
       fontSize: '0.875rem',
       fontWeight: '400',
-      lineHeight: 1.43
+      lineHeight: 1.5,
+      fontFamily: '"Poppins", "Nunito", "Circular", sans-serif'
     },
     button: {
-      fontSize: '0.875rem',
+      fontSize: '0.9rem',
       fontWeight: '500',
       textTransform: 'none',
-      letterSpacing: '0.02em'
+      letterSpacing: '0.02em',
+      fontFamily: '"Poppins", "Nunito", "Circular", sans-serif'
     }
   },
   
@@ -86,16 +99,19 @@ export const theme = {
   },
   
   borderRadius: {
-    small: '4px',
-    medium: '8px',
-    large: '12px',
-    round: '50%'
+    small: '8px',
+    medium: '16px',
+    large: '24px',
+    xlarge: '32px',
+    round: '50%',
+    bubble: '20px'
   },
   
   shadows: {
-    light: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
-    medium: '0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)',
-    heavy: '0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23)'
+    light: '0 2px 8px rgba(0,0,0,0.08), 0 2px 4px rgba(168,216,168,0.12)',
+    medium: '0 4px 12px rgba(0,0,0,0.12), 0 4px 8px rgba(168,216,168,0.16)',
+    heavy: '0 8px 24px rgba(0,0,0,0.16), 0 8px 16px rgba(168,216,168,0.20)',
+    bubble: '0 6px 20px rgba(0,0,0,0.1), 0 4px 12px rgba(168,216,168,0.15)'
   }
 };
 

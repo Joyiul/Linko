@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import EmojiToneBar from '../components/EmojiToneBar';
 import HighlightedText from '../components/HighlightedText';
+import TextSimplificationBox from '../components/TextSimplificationBox';
+import EmotionImage from '../components/EmotionImage';
 import './AnalysisPage.css';
 
 export default function AnalysisPage() {
@@ -103,25 +105,50 @@ export default function AnalysisPage() {
               </div>
             </div>
 
-            {/* Emotion Scores Breakdown */}
-            {emotionAnalysis.emotion_scores && (
+            {/* Primary Detected Emotion */}
+            {emotionAnalysis.detected_emotion && (
               <div>
-                <h5>Emotion Indicators Found:</h5>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px' }}>
-                  {Object.entries(emotionAnalysis.emotion_scores).map(([emotion, score]) => (
-                    <div key={emotion} style={{ 
-                      textAlign: 'center',
-                      padding: '8px',
-                      backgroundColor: score > 0 ? '#e7f5e7' : '#f8f9fa',
-                      borderRadius: '5px',
-                      border: score > 0 ? '2px solid #28a745' : '1px solid #dee2e6'
-                    }}>
-                      <div style={{ fontSize: '0.85rem', textTransform: 'capitalize', fontFamily: 'Poppins, Nunito, Circular, sans-serif', color: '#6c757d', fontWeight: '400', letterSpacing: '0.1px' }}>{emotion}</div>
-                      <div style={{ fontWeight: '500', color: score > 0 ? '#28a745' : '#6c757d', fontFamily: 'Poppins, Nunito, Circular, sans-serif', fontSize: '0.9rem' }}>
-                        {score}
+                <h5>Detected Emotion:</h5>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center',
+                  padding: '20px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '12px',
+                  border: '2px solid #28a745',
+                  marginBottom: '20px'
+                }}>
+                  <div style={{ 
+                    textAlign: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '12px'
+                  }}>
+                    <EmotionImage emotion={emotionAnalysis.detected_emotion} size={80} />
+                    <div>
+                      <div style={{ 
+                        fontSize: '1.5rem', 
+                        textTransform: 'capitalize', 
+                        fontFamily: 'Poppins, Nunito, Circular, sans-serif', 
+                        color: '#495057', 
+                        fontWeight: '600', 
+                        letterSpacing: '0.5px',
+                        marginBottom: '8px'
+                      }}>
+                        {emotionAnalysis.detected_emotion}
+                      </div>
+                      <div style={{ 
+                        fontSize: '1.1rem',
+                        color: getConfidenceColor(emotionAnalysis.confidence || 0),
+                        fontFamily: 'Poppins, Nunito, Circular, sans-serif',
+                        fontWeight: '500'
+                      }}>
+                        Confidence: {((emotionAnalysis.confidence || 0) * 100).toFixed(1)}%
                       </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -158,17 +185,58 @@ export default function AnalysisPage() {
             
             {/* Primary Emotion from Video */}
             <div style={{ marginBottom: '15px' }}>
-              <div style={{ fontSize: '1.3rem', fontWeight: '600', textTransform: 'capitalize', color: '#495057' }}>
-                Primary Emotion: {analysis.video_analysis.dominant_emotion || 'Not detected'}
-              </div>
-              {analysis.video_analysis.confidence && (
-                <div style={{
-                  fontSize: '1rem',
-                  color: getConfidenceColor(analysis.video_analysis.confidence),
-                  fontWeight: '500',
-                  marginTop: '5px'
+              <h5 style={{ marginBottom: '15px', color: '#6c757d' }}>Detected Facial Emotion:</h5>
+              {analysis.video_analysis.dominant_emotion ? (
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center',
+                  padding: '20px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '12px',
+                  border: '2px solid #17a2b8',
+                  marginBottom: '20px'
                 }}>
-                  Confidence: {(analysis.video_analysis.confidence * 100).toFixed(1)}%
+                  <div style={{ 
+                    textAlign: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '12px'
+                  }}>
+                    <EmotionImage emotion={analysis.video_analysis.dominant_emotion} size={70} />
+                    <div>
+                      <div style={{ 
+                        fontSize: '1.3rem', 
+                        fontWeight: '600', 
+                        textTransform: 'capitalize', 
+                        color: '#495057',
+                        marginBottom: '8px'
+                      }}>
+                        {analysis.video_analysis.dominant_emotion}
+                      </div>
+                      {analysis.video_analysis.confidence && (
+                        <div style={{
+                          fontSize: '1rem',
+                          color: getConfidenceColor(analysis.video_analysis.confidence),
+                          fontWeight: '500'
+                        }}>
+                          Confidence: {(analysis.video_analysis.confidence * 100).toFixed(1)}%
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ 
+                  textAlign: 'center',
+                  padding: '20px',
+                  backgroundColor: '#fff3cd',
+                  borderRadius: '8px',
+                  border: '1px solid #ffeaa7',
+                  color: '#856404'
+                }}>
+                  No facial emotion detected
                 </div>
               )}
             </div>
@@ -217,29 +285,6 @@ export default function AnalysisPage() {
               )}
             </div>
 
-            {/* Emotion Distribution */}
-            {analysis.video_analysis.emotion_distribution && Object.keys(analysis.video_analysis.emotion_distribution).length > 1 && (
-              <div style={{ marginTop: '20px' }}>
-                <h5>Emotion Distribution Across Video</h5>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px' }}>
-                  {Object.entries(analysis.video_analysis.emotion_distribution).map(([emotion, count]) => (
-                    <div key={emotion} style={{
-                      textAlign: 'center',
-                      padding: '10px',
-                      backgroundColor: count > 1 ? '#e7f5e7' : '#f8f9fa',
-                      borderRadius: '5px',
-                      border: count > 1 ? '2px solid #28a745' : '1px solid #dee2e6'
-                    }}>
-                      <div style={{ fontSize: '0.85rem', textTransform: 'capitalize', color: '#6c757d' }}>{emotion}</div>
-                      <div style={{ fontWeight: '600', color: count > 1 ? '#28a745' : '#6c757d' }}>
-                        {count} frame{count !== 1 ? 's' : ''}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Video Quality Feedback */}
             <div style={{
               marginTop: '20px',
@@ -263,19 +308,70 @@ export default function AnalysisPage() {
       <div style={{ marginBottom: '30px' }}>
         <h3>Transcript</h3>
         {results.transcript ? (
-          <div style={{ 
-            padding: '15px', 
-            backgroundColor: '#FFFFFF', 
-            borderRadius: '5px',
-            border: '1px solid #dee2e6',
-            fontStyle: 'italic'
-          }}>
-            <HighlightedText text={results.transcript} />
+          <div>
+            <div style={{ 
+              padding: '15px', 
+              backgroundColor: '#FFFFFF', 
+              borderRadius: '5px',
+              border: '1px solid #dee2e6',
+              fontStyle: 'italic',
+              fontSize: '1.1rem',
+              lineHeight: '1.6'
+            }}>
+              {/* Display highlighted text if sarcasm analysis is available, otherwise show plain transcript */}
+              {analysis.comprehensive_sarcasm_analysis && analysis.comprehensive_sarcasm_analysis.highlighted_text ? (
+                <div dangerouslySetInnerHTML={{ 
+                  __html: analysis.comprehensive_sarcasm_analysis.highlighted_text 
+                }} />
+              ) : (
+                <HighlightedText text={results.transcript} />
+              )}
+            </div>
+            
+            {/* Sarcasm Key - only show if sarcasm is detected */}
+            {analysis.comprehensive_sarcasm_analysis && analysis.comprehensive_sarcasm_analysis.sarcasm_detected && (
+              <div style={{ 
+                marginTop: '10px', 
+                fontSize: '0.9rem', 
+                color: '#6c757d',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '8px 12px',
+                backgroundColor: '#f8f9fa',
+                borderRadius: '5px',
+                border: '1px solid #dee2e6'
+              }}>
+                <span style={{ 
+                  color: 'red', 
+                  fontWeight: 'bold',
+                  fontSize: '1.1rem'
+                }}>■</span>
+                <span>Red text indicates sarcasm</span>
+                <span style={{ 
+                  marginLeft: 'auto',
+                  fontSize: '0.8rem',
+                  color: '#999'
+                }}>
+                  Confidence: {(analysis.comprehensive_sarcasm_analysis.confidence * 100).toFixed(1)}%
+                </span>
+              </div>
+            )}
           </div>
         ) : (
           <p style={{ color: '#666' }}>No transcript available</p>
         )}
       </div>
+
+      {/* Text Simplification Section */}
+      {results.transcript && (
+        <div style={{ marginBottom: '30px' }}>
+          <TextSimplificationBox 
+            originalText={results.transcript} 
+            initialSimplification={analysis.text_simplification}
+          />
+        </div>
+      )}
 
       <div>
         <h3>Slang Detection</h3>
@@ -288,22 +384,49 @@ export default function AnalysisPage() {
             padding: '15px',
             border: '1px solid #dee2e6'
           }}>
-            {Object.entries(analysis.slang || results.slang || {}).map(([word, meaning]) => (
-              <li key={word} style={{ 
-                marginBottom: '12px',
-                padding: '12px',
-                backgroundColor: 'white',
-                borderRadius: '6px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
-                fontFamily: 'Poppins, Nunito, Circular, sans-serif',
-                lineHeight: '1.5',
-                fontWeight: '400',
-                fontSize: '1rem'
-              }}>
-                <strong style={{ color: '#6c757d', fontWeight: '600', letterSpacing: '0.1px' }}>"{word}"</strong> 
-                <span style={{ color: '#6c757d', fontSize: '1rem', fontWeight: '400' }}> → {meaning}</span>
-              </li>
-            ))}
+            {Object.entries(analysis.slang || results.slang || {}).map(([word, slangData]) => {
+              // Handle both old format (string) and new format (object)
+              const meaning = typeof slangData === 'string' ? slangData : slangData?.meaning || slangData;
+              const popularity = typeof slangData === 'object' ? slangData?.popularity : null;
+              const type = typeof slangData === 'object' ? slangData?.type : null;
+              
+              return (
+                <li key={word} style={{ 
+                  marginBottom: '12px',
+                  padding: '12px',
+                  backgroundColor: 'white',
+                  borderRadius: '6px',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
+                  fontFamily: 'Poppins, Nunito, Circular, sans-serif',
+                  lineHeight: '1.5',
+                  fontWeight: '400',
+                  fontSize: '1rem'
+                }}>
+                  <strong style={{ color: '#6c757d', fontWeight: '600', letterSpacing: '0.1px' }}>"{word}"</strong> 
+                  <span style={{ color: '#6c757d', fontSize: '1rem', fontWeight: '400' }}> → {meaning}</span>
+                  {popularity && (
+                    <span style={{ 
+                      marginLeft: '8px', 
+                      fontSize: '0.8rem', 
+                      color: popularity === 'high' ? '#28a745' : popularity === 'medium' ? '#ffc107' : '#6c757d',
+                      fontWeight: '500'
+                    }}>
+                      [{popularity}]
+                    </span>
+                  )}
+                  {type && (
+                    <span style={{ 
+                      marginLeft: '4px', 
+                      fontSize: '0.7rem', 
+                      color: '#6c757d',
+                      fontStyle: 'italic'
+                    }}>
+                      ({type})
+                    </span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p style={{ 

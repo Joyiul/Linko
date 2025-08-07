@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { theme } from '../theme';
 
 const EmotionAccuracyDemo = () => {
   const [selectedText, setSelectedText] = useState('');
@@ -19,14 +20,14 @@ const EmotionAccuracyDemo = () => {
   const analyzeText = async (text) => {
     setLoading(true);
     try {
-      const response = await axios.post('http://127.0.0.1:5001/analyze', {
+      const response = await axios.post('http://127.0.0.1:5002/analyze', {
         transcript: text
       });
       setAnalysis(response.data);
     } catch (error) {
       console.error('Analysis failed:', error);
       setAnalysis({ 
-        error: 'Analysis failed. Please check if the backend is running on port 5001.',
+        error: 'Analysis failed. Please check if the backend is running on port 5002.',
         errorDetails: error.message 
       });
     }
@@ -91,22 +92,40 @@ const EmotionAccuracyDemo = () => {
 
   return (
     <div style={{ 
-      padding: '20px', 
+      padding: theme.spacing.lg, 
       maxWidth: '800px', 
       margin: '0 auto',
-      fontFamily: 'Arial, sans-serif'
+      fontFamily: theme.typography.fontFamily,
+      background: theme.colors.backgroundGradient,
+      minHeight: '100vh'
     }}>
-      <h2 style={{ color: '#333', marginBottom: '20px' }}>
+      <h2 style={{ 
+        ...theme.typography.h2,
+        color: theme.colors.primary, 
+        marginBottom: theme.spacing.lg,
+        textAlign: 'center'
+      }}>
         🧠 Improved Emotion Analysis Demo
       </h2>
-      <p style={{ color: '#666', marginBottom: '20px' }}>
+      <p style={{ 
+        ...theme.typography.body1,
+        color: theme.colors.onSurfaceVariant, 
+        marginBottom: theme.spacing.lg,
+        textAlign: 'center'
+      }}>
         Test the improved emotion detection system with predefined examples or your own text.
       </p>
 
       {/* Test Case Buttons */}
-      <div style={{ marginBottom: '20px' }}>
-        <h3>Quick Test Cases:</h3>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+      <div style={{ marginBottom: theme.spacing.lg }}>
+        <h3 style={{ 
+          ...theme.typography.h3,
+          color: theme.colors.secondary,
+          marginBottom: theme.spacing.md
+        }}>
+          Quick Test Cases:
+        </h3>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: theme.spacing.sm }}>
           {testCases.map((testCase, index) => (
             <button
               key={index}
@@ -115,16 +134,28 @@ const EmotionAccuracyDemo = () => {
                 analyzeText(testCase.text);
               }}
               style={{
-                padding: '8px 12px',
-                borderRadius: '6px',
-                border: '1px solid #ddd',
-                backgroundColor: getEmotionColor(testCase.expected),
-                color: 'white',
+                ...theme.typography.button,
+                padding: theme.spacing.sm + ' ' + theme.spacing.md,
+                borderRadius: theme.borderRadius.bubble,
+                border: `2px solid ${theme.colors.primary}`,
+                background: 'transparent',
+                color: theme.colors.primary,
                 cursor: 'pointer',
-                fontSize: '12px'
+                transition: 'all 0.3s ease',
+                fontSize: '0.85rem'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = theme.colors.primary;
+                e.target.style.color = theme.colors.onPrimary;
+                e.target.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'transparent';
+                e.target.style.color = theme.colors.primary;
+                e.target.style.transform = 'translateY(0)';
               }}
             >
-              {testCase.expected.charAt(0).toUpperCase() + testCase.expected.slice(1)}
+              {testCase.expected.toUpperCase()}: {testCase.text.substring(0, 30)}...
             </button>
           ))}
         </div>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emotion Image Test - Disgust</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .emotion-test {
+            display: inline-block;
+            margin: 20px;
+            text-align: center;
+        }
+        .emotion-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            font-family: monospace;
+            font-weight: bold;
+            color: #000;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+        }
+        .disgust {
+            background-color: #B8860B;
+        }
+        .eyes {
+            font-size: 16px;
+            margin-bottom: 4px;
+            letter-spacing: 0.3em;
+            margin-top: 12px;
+        }
+        .mouth {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .tear {
+            position: absolute;
+            right: 20px;
+            top: 32px;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Emotion Image Test - Disgust</h1>
+    
+    <div class="emotion-test">
+        <div class="emotion-circle disgust">
+            <div class="eyes">— —</div>
+            <div class="mouth">—</div>
+            <div class="tear">○</div>
+        </div>
+        <div><strong>Disgust</strong></div>
+        <div>Color: #B8860B</div>
+    </div>
+    
+    <h2>Test Phrases:</h2>
+    <ul>
+        <li>"This is disgusting" → disgust (50%)</li>
+        <li>"That makes me sick" → disgust (95%)</li>
+        <li>"So gross" → disgust (95%)</li>
+        <li>"I am disgusted" → disgust (50%)</li>
+        <li>"This is revolting" → disgust (50%)</li>
+    </ul>
+    
+    <p><strong>The disgust emotion is now updated!</strong> The system will detect disgust phrases and display this exact brown/tan emotion image with the teardrop on the right side.</p>
+</body>
+</html>

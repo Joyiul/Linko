@@ -30,27 +30,50 @@ export default function ChatPage() {
     // Add the original message
     response += `**Your message:** "${userMessage}"\n\n`;
     
+    // Priority: Check for sarcasm first
+    if (analysis?.sarcasm_analysis?.sarcasm_detected) {
+      const sarcasm = analysis.sarcasm_analysis;
+      response += `🎭 **SARCASM DETECTED!** (Confidence: ${(sarcasm.confidence * 100).toFixed(0)}%)\n\n`;
+      response += `**Sarcasm Type:** ${sarcasm.sarcasm_type || 'General'}\n\n`;
+      
+      if (sarcasm.reasons && sarcasm.reasons.length > 0) {
+        response += `**Why this is sarcastic:**\n`;
+        sarcasm.reasons.forEach(reason => {
+          response += `• ${reason}\n`;
+        });
+        response += "\n";
+      }
+      
+      response += `**What you really mean:** You're expressing frustration or dissatisfaction, but using positive words ironically. You don't literally mean what you're saying - you mean the opposite!\n\n`;
+      
+      if (sarcasm.sarcasm_type === 'economic' || sarcasm.sarcasm_type === 'work_related') {
+        response += `**Context:** This is **economic sarcasm** - you're frustrated about work or money issues. This is very common when people feel underpaid or overworked.\n\n`;
+      }
+      
+      response += `**Cultural Note:** Sarcasm is very common in English, especially when expressing frustration about work, money, or daily life. Native speakers use it to vent feelings without being directly negative.\n\n`;
+    }
+    
     // Analyze tone with detailed explanation
     if (analysis?.tone) {
       const tone = analysis.tone.toLowerCase();
       const toneEmoji = getToneEmoji(analysis.tone);
       
-      response += `**Tone Analysis:** ${analysis.tone}\n`;
-      
-      if (tone.includes('sarcastic')) {
-        response += `This message contains **sarcasm** - meaning you're saying something but actually mean the opposite or are being ironic. Sarcasm can be tricky to detect, especially for language learners, because the literal words don't match the intended meaning.\n\n`;
-      } else if (tone.includes('appreciative') || tone.includes('inspirational')) {
-        response += `This shows a **positive, grateful tone** - you're expressing appreciation or trying to inspire others. This creates a warm, encouraging feeling.\n\n`;
-      } else if (tone.includes('angry') || tone.includes('direct')) {
-        response += `This has a **direct, assertive tone** - you're being straightforward and serious. This isn't necessarily rude, but it shows you mean business.\n\n`;
-      } else if (tone.includes('diplomatic')) {
-        response += `This shows **diplomatic communication** - you're being polite, respectful, and trying to avoid conflict. This is great for professional or sensitive conversations.\n\n`;
-      } else if (tone.includes('cautionary')) {
-        response += `This has a **warning or cautious tone** - you're trying to alert someone to potential problems or giving advice to be careful.\n\n`;
-      } else if (tone.includes('informative')) {
-        response += `This is **informative and educational** - you're sharing knowledge or explaining something to help others learn.\n\n`;
-      } else {
-        response += `This has a **neutral, conversational tone** - friendly and casual without strong emotions.\n\n`;
+      if (!tone.includes('sarcastic')) {
+        response += `**Tone Analysis:** ${analysis.tone}\n`;
+        
+        if (tone.includes('appreciative') || tone.includes('inspirational')) {
+          response += `This shows a **positive, grateful tone** - you're expressing appreciation or trying to inspire others. This creates a warm, encouraging feeling.\n\n`;
+        } else if (tone.includes('angry') || tone.includes('direct')) {
+          response += `This has a **direct, assertive tone** - you're being straightforward and serious. This isn't necessarily rude, but it shows you mean business.\n\n`;
+        } else if (tone.includes('diplomatic')) {
+          response += `This shows **diplomatic communication** - you're being polite, respectful, and trying to avoid conflict. This is great for professional or sensitive conversations.\n\n`;
+        } else if (tone.includes('cautionary')) {
+          response += `This has a **warning or cautious tone** - you're trying to alert someone to potential problems or giving advice to be careful.\n\n`;
+        } else if (tone.includes('informative')) {
+          response += `This is **informative and educational** - you're sharing knowledge or explaining something to help others learn.\n\n`;
+        } else {
+          response += `This has a **neutral, conversational tone** - friendly and casual without strong emotions.\n\n`;
+        }
       }
     }
     
@@ -58,7 +81,9 @@ export default function ChatPage() {
     if (analysis?.slang && Object.keys(analysis.slang).length > 0) {
       response += `**🗣️ Slang & Cultural Terms Found:**\n`;
       
-      Object.entries(analysis.slang).forEach(([word, meaning]) => {
+      Object.entries(analysis.slang).forEach(([word, slangData]) => {
+        // Handle both old format (string) and new format (object)
+        const meaning = typeof slangData === 'string' ? slangData : slangData?.meaning || slangData;
         response += `• **"${word}"** means: ${meaning}\n`;
         response += `  Context: This is informal language you might hear in casual conversations.\n`;
       });
@@ -73,7 +98,9 @@ export default function ChatPage() {
     response += `This is a ${complexity} sentence. `;
     
     // Provide cultural context
-    if (analysis?.tone?.toLowerCase().includes('sarcastic')) {
+    if (analysis?.sarcasm_analysis?.sarcasm_detected) {
+      response += `The sarcasm here means the speaker doesn't literally mean what they're saying - they're being ironic or expressing frustration. In English culture, sarcasm is very common, especially about work and money, but can be confusing for non-native speakers.`;
+    } else if (analysis?.tone?.toLowerCase().includes('sarcastic')) {
       response += `The sarcasm here means the speaker doesn't literally mean what they're saying - they're being ironic or mocking. In English culture, sarcasm is common but can be confusing for non-native speakers.`;
     } else {
       response += `The speaker is communicating directly and genuinely - what they say is what they mean.`;
@@ -96,7 +123,7 @@ export default function ChatPage() {
 
   const analyzeMessage = async (text) => {
     try {
-      const response = await axios.post("http://localhost:5001/analyze", {
+      const response = await axios.post("http://localhost:5002/analyze", {
         transcript: text,
       }, {
         timeout: 15000,
@@ -189,8 +216,12 @@ export default function ChatPage() {
 
     // Enhanced sarcasm detection with clear visual indicator
     const tone = message.analysis.tone?.toLowerCase() || '';
-    if (tone.includes('sarcastic')) {
-      highlightedText = `<span class="sarcasm-highlight" title="Sarcasm detected! This person doesn't literally mean what they're saying.">${highlightedText}</span>`;
+    const hasSarcasm = message.analysis.sarcasm_analysis?.sarcasm_detected || tone.includes('sarcastic');
+    
+    if (hasSarcasm) {
+      const confidence = message.analysis.sarcasm_analysis?.confidence || 0.5;
+      const confidencePercent = Math.round(confidence * 100);
+      highlightedText = `<span class="sarcasm-highlight" title="🎭 Sarcasm detected (${confidencePercent}% confidence)! This person doesn't literally mean what they're saying - they're being ironic or expressing frustration.">${highlightedText}</span>`;
     } else if (tone.includes('cautionary') || tone.includes('warning')) {
       highlightedText = `<span class="warning-highlight" title="⚠️ Warning tone detected">${highlightedText}</span>`;
     } else if (tone.includes('angry') || tone.includes('direct')) {
@@ -262,9 +293,14 @@ export default function ChatPage() {
                     </div>
                   )}
                   
-                  {message.analysis.tone?.toLowerCase().includes('sarcastic') && (
+                  {(message.analysis.tone?.toLowerCase().includes('sarcastic') || message.analysis.sarcasm_analysis?.sarcasm_detected) && (
                     <div className="sarcasm-warning">
-                      <span className="sarcasm-alert">Sarcasm Alert: Not literal meaning!</span>
+                      <span className="sarcasm-alert">
+                        🎭 Sarcasm Alert: Not literal meaning! 
+                        {message.analysis.sarcasm_analysis?.confidence && 
+                          ` (${Math.round(message.analysis.sarcasm_analysis.confidence * 100)}% confidence)`
+                        }
+                      </span>
                     </div>
                   )}
                 </div>

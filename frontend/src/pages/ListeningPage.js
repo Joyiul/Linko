@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import VoiceRecorder from '../components/VoiceRecorder';
-import './ListeningPage.css';
+import { theme } from '../theme';
 
 export default function ListeningPage() {
   const [file, setFile] = useState(null);
@@ -51,7 +51,7 @@ export default function ListeningPage() {
         console.log("Processing audio...");
         
         // Call the complete pipeline endpoint
-        const response = await axios.post("http://localhost:5001/upload-and-analyze", formData, {
+        const response = await axios.post("http://localhost:5002/upload-and-analyze", formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -79,16 +79,17 @@ export default function ListeningPage() {
           filename: data.filename || (recordedBlob ? "Recorded Audio" : file?.name)
         });
 
-        // Save results for analysis page
+        // Save complete results for analysis page
         const resultData = {
           transcript: data.transcript,
           tone: data.analysis.tone,
           slang: data.analysis.slang,
+          analysis: data.analysis, // Save the complete analysis object
           filename: data.filename || (recordedBlob ? "Recorded Audio" : file?.name)
         };
         
         localStorage.setItem("analysisResults", JSON.stringify(resultData));
-        console.log("Results saved to localStorage");
+        console.log("Complete results saved to localStorage");
         
         // Navigate to results
         setTimeout(() => {
@@ -99,7 +100,7 @@ export default function ListeningPage() {
         // Handle manual text analysis
         console.log("Analyzing text:", transcript.substring(0, 50) + "...");
         
-        const res = await axios.post("http://localhost:5001/analyze", {
+        const res = await axios.post("http://localhost:5002/analyze", {
           transcript,
         }, {
           timeout: 30000, // 30 second timeout
@@ -113,15 +114,16 @@ export default function ListeningPage() {
         
         setResults(res.data);
 
-        // Save results for analysis page
+        // Save complete results for analysis page
         const resultData = {
           transcript: transcript,
           tone: res.data.tone,
-          slang: res.data.slang
+          slang: res.data.slang,
+          analysis: res.data // Save the complete analysis response
         };
         
         localStorage.setItem("analysisResults", JSON.stringify(resultData));
-        console.log("Manual analysis results saved to localStorage");
+        console.log("Complete manual analysis results saved to localStorage");
         
         // Navigate to results
         setTimeout(() => {
@@ -150,45 +152,76 @@ export default function ListeningPage() {
   };
 
   return (
-    <div className="listening-container">
-            <h2 style={{ textAlign: 'center', marginBottom: 30, color: '#666666' }}>
+    <div style={{
+      background: theme.colors.backgroundGradient,
+      minHeight: '100vh',
+      color: theme.colors.onBackground,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      padding: theme.spacing.lg,
+      fontFamily: theme.typography.body1.fontFamily
+    }}>
+      <h2 style={{ 
+        ...theme.typography.h2,
+        textAlign: 'center', 
+        marginBottom: theme.spacing.xl, 
+        color: theme.colors.primary,
+        fontWeight: '600'
+      }}>
         Audio Analysis & Slang Detection
       </h2>
       
       {error && (
-        <div className="error-message" style={{
-          color: 'red', 
-          marginBottom: '20px',
-          padding: '15px',
-          backgroundColor: '#ffe6e6',
-          borderRadius: '8px',
-          border: '1px solid #ff9999'
+        <div style={{
+          color: theme.colors.error, 
+          marginBottom: theme.spacing.lg,
+          padding: theme.spacing.md,
+          background: 'rgba(255, 107, 107, 0.1)',
+          borderRadius: theme.borderRadius.bubble,
+          border: `2px solid ${theme.colors.error}`,
+          boxShadow: theme.shadows.light,
+          fontWeight: '500'
         }}>
           {error}
         </div>
       )}
       
       {/* Tab Navigation */}
-      <div style={{ marginBottom: '30px' }}>
+      <div style={{ marginBottom: theme.spacing.xl }}>
         <div style={{ 
           display: 'flex', 
           justifyContent: 'center', 
-          gap: '10px',
-          marginBottom: '20px',
-          borderBottom: '2px solid #e9ecef'
+          gap: theme.spacing.sm,
+          marginBottom: theme.spacing.lg,
+          borderBottom: `2px solid ${theme.colors.surfaceVariant}`,
+          borderRadius: theme.borderRadius.medium
         }}>
           <button
             onClick={() => setActiveTab("upload")}
             style={{
-              padding: '12px 24px',
-              backgroundColor: activeTab === "upload" ? '#A8D8A8' : 'transparent',
-              color: activeTab === "upload" ? 'white' : '#A8D8A8',
-              border: 'none',
-              borderBottom: activeTab === "upload" ? '3px solid #A8D8A8' : '3px solid transparent',
+              ...theme.typography.button,
+              padding: theme.spacing.md,
+              backgroundColor: activeTab === "upload" ? theme.colors.primary : 'transparent',
+              color: activeTab === "upload" ? 'white' : theme.colors.primary,
+              border: `2px solid ${theme.colors.primary}`,
+              borderRadius: theme.borderRadius.bubble,
               cursor: 'pointer',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              borderRadius: '8px 8px 0 0'
+              fontWeight: '600',
+              transition: 'all 0.3s ease',
+              boxShadow: activeTab === "upload" ? theme.shadows.light : 'none'
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== "upload") {
+                e.target.style.backgroundColor = theme.colors.primaryLight;
+                e.target.style.color = 'white';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== "upload") {
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.color = theme.colors.primary;
+              }
             }}
           >
             Upload File
@@ -196,15 +229,28 @@ export default function ListeningPage() {
           <button
             onClick={() => setActiveTab("record")}
             style={{
-              padding: '12px 24px',
-              backgroundColor: activeTab === "record" ? '#A8D8A8' : 'transparent',
-              color: activeTab === "record" ? 'white' : '#A8D8A8',
-              border: 'none',
-              borderBottom: activeTab === "record" ? '3px solid #A8D8A8' : '3px solid transparent',
+              ...theme.typography.button,
+              padding: theme.spacing.md,
+              backgroundColor: activeTab === "record" ? theme.colors.secondary : 'transparent',
+              color: activeTab === "record" ? 'white' : theme.colors.secondary,
+              border: `2px solid ${theme.colors.secondary}`,
+              borderRadius: theme.borderRadius.bubble,
               cursor: 'pointer',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              borderRadius: '8px 8px 0 0'
+              fontWeight: '600',
+              transition: 'all 0.3s ease',
+              boxShadow: activeTab === "record" ? theme.shadows.light : 'none'
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== "record") {
+                e.target.style.backgroundColor = theme.colors.secondaryLight;
+                e.target.style.color = 'white';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== "record") {
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.color = theme.colors.secondary;
+              }
             }}
           >
             Record Audio
@@ -212,15 +258,28 @@ export default function ListeningPage() {
           <button
             onClick={() => setActiveTab("text")}
             style={{
-              padding: '12px 24px',
-              backgroundColor: activeTab === "text" ? '#A8D8A8' : 'transparent',
-              color: activeTab === "text" ? 'white' : '#A8D8A8',
-              border: 'none',
-              borderBottom: activeTab === "text" ? '3px solid #A8D8A8' : '3px solid transparent',
+              ...theme.typography.button,
+              padding: theme.spacing.md,
+              backgroundColor: activeTab === "text" ? theme.colors.accent : 'transparent',
+              color: activeTab === "text" ? 'white' : theme.colors.accent,
+              border: `2px solid ${theme.colors.accent}`,
+              borderRadius: theme.borderRadius.bubble,
               cursor: 'pointer',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              borderRadius: '8px 8px 0 0'
+              fontWeight: '600',
+              transition: 'all 0.3s ease',
+              boxShadow: activeTab === "text" ? theme.shadows.light : 'none'
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== "text") {
+                e.target.style.backgroundColor = theme.colors.accentLight;
+                e.target.style.color = 'white';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== "text") {
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.color = theme.colors.accent;
+              }
             }}
           >
             Enter Text
@@ -229,22 +288,29 @@ export default function ListeningPage() {
       </div>
 
       {/* Content Based on Active Tab */}
-      <div style={{ minHeight: '200px', marginBottom: '30px' }}>
+      <div style={{ minHeight: '200px', marginBottom: theme.spacing.xl, maxWidth: '600px', width: '100%' }}>
         {activeTab === "upload" && (
-          <div className="upload-area" style={{ 
+          <div style={{ 
             textAlign: 'center', 
-            padding: '40px', 
-            border: '2px dashed #A8D8A8', 
-            borderRadius: '10px',
-            backgroundColor: '#f8f9fa'
+            padding: theme.spacing.xxl, 
+            border: `3px dashed ${theme.colors.primary}`, 
+            borderRadius: theme.borderRadius.bubble,
+            background: theme.colors.surface,
+            boxShadow: theme.shadows.bubble,
+            backdropFilter: 'blur(10px)'
           }}>
-            <h3>Upload Audio or Video File</h3>
-            <p style={{ color: '#666', marginBottom: '20px' }}>
+            <h3 style={{ ...theme.typography.h3, marginBottom: theme.spacing.md, color: theme.colors.primary }}>
+              Upload Audio or Video File
+            </h3>
+            <p style={{ 
+              ...theme.typography.body1,
+              color: theme.colors.onSurfaceVariant, 
+              marginBottom: theme.spacing.lg
+            }}>
               Supports: WAV, MP3, MP4, AVI, MOV, FLAC, M4A, OGG
             </p>
             <input
               type="file"
-              className="upload-input"
               accept="audio/*,video/*,.wav,.mp3,.mp4,.avi,.mov,.flac,.m4a,.ogg"
               onChange={(e) => {
                 setFile(e.target.files[0]);
@@ -253,11 +319,13 @@ export default function ListeningPage() {
               }}
               disabled={loading}
               style={{
-                marginBottom: '15px',
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '5px',
-                fontSize: '16px'
+                ...theme.typography.body1,
+                marginBottom: theme.spacing.md,
+                padding: theme.spacing.sm,
+                borderRadius: theme.borderRadius.medium,
+                border: `2px solid ${theme.colors.primary}`,
+                background: 'rgba(255,255,255,0.7)',
+                cursor: loading ? 'not-allowed' : 'pointer'
               }}
             />
             {file && (
@@ -325,33 +393,34 @@ export default function ListeningPage() {
       </div>
 
       {/* Main Decipher Button */}
-      <div style={{ textAlign: 'center', marginTop: '30px' }}>
+      <div style={{ textAlign: 'center', marginTop: theme.spacing.xl }}>
         <button 
           onClick={handleDecipher}
           disabled={loading || (!file && !recordedBlob && !transcript.trim())}
           style={{
-            padding: '20px 40px',
-            backgroundColor: loading ? '#6c757d' : '#A8D8A8',
+            ...theme.typography.button,
+            padding: `${theme.spacing.lg}px ${theme.spacing.xxl}px`,
+            backgroundColor: loading ? theme.colors.onSurfaceVariant : theme.colors.accent,
             color: 'white',
             border: 'none',
-            borderRadius: '50px',
+            borderRadius: theme.borderRadius.bubble,
             cursor: loading ? 'not-allowed' : 'pointer',
             fontSize: '20px',
-            fontWeight: 'bold',
-            boxShadow: '0 4px 15px rgba(168, 216, 168, 0.3)',
+            fontWeight: '700',
+            boxShadow: loading ? 'none' : theme.shadows.bubble,
             transform: loading ? 'none' : 'scale(1)',
             transition: 'all 0.3s ease'
           }}
           onMouseOver={(e) => {
             if (!loading) {
-              e.target.style.transform = 'scale(1.05)';
-              e.target.style.boxShadow = '0 6px 20px rgba(168, 216, 168, 0.4)';
+              e.target.style.transform = 'scale(1.05) translateY(-2px)';
+              e.target.style.boxShadow = theme.shadows.heavy;
             }
           }}
           onMouseOut={(e) => {
             if (!loading) {
               e.target.style.transform = 'scale(1)';
-              e.target.style.boxShadow = '0 4px 15px rgba(168, 216, 168, 0.3)';
+              e.target.style.boxShadow = theme.shadows.bubble;
             }
           }}
         >
