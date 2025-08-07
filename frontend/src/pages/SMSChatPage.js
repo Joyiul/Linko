@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import FormalityAnalysis from '../components/FormalityAnalysis';
 import './ChatPage.css';
 
 export default function ChatPage() {
@@ -284,19 +283,6 @@ export default function ChatPage() {
                       </span>
                     </div>
                   )}
-
-                  {/* Formality Analysis for Chat Messages */}
-                  <div style={{ marginTop: 12 }}>
-                    <FormalityAnalysis 
-                      text={message.text}
-                      initialData={message.analysis.formality_analysis ? { 
-                        formality_analysis: message.analysis.formality_analysis,
-                        explicit_formality_breakdown: message.analysis.explicit_formality_breakdown,
-                        success: true 
-                      } : null}
-                      showTitle={false}
-                    />
-                  </div>
                 </div>
               )}
             </div>

@@ -4,6 +4,8 @@ from processing.slang_detect import detect_slang, enhanced_detector
 from processing.robust_emotion_analysis import analyze_emotion_robust
 from processing.sarcasm_detection import detect_sarcasm, get_sarcasm_explanation, get_comprehensive_sarcasm_analysis
 from processing.text_simplification import simplify_text_for_learners, get_text_readability
+from processing.formality_analysis import analyze_formality
+from processing.conversational_sms_bot import get_sms_bot_response, get_practice_suggestion
 import os
 import tempfile
 
@@ -204,6 +206,9 @@ def analyze_file():
     simplified_analysis = simplify_text_for_learners(transcript)
     readability_info = get_text_readability(transcript)
     
+    # NEW: Formality analysis
+    formality_analysis = analyze_formality(transcript)
+    
     # Get base tone analysis
     base_tone = analyze_audio(transcript)
     
@@ -240,6 +245,7 @@ def analyze_file():
         "comprehensive_sarcasm_analysis": comprehensive_sarcasm,  # NEW - Complete sarcasm analysis with highlighting
         "text_simplification": simplified_analysis,  # NEW - LLM-powered text simplification
         "readability_analysis": readability_info,  # NEW - Reading level analysis
+        "formality_analysis": formality_analysis,  # NEW - Detailed formality detection
         "slang": comprehensive_slang['found_terms'],  # Legacy format
         "comprehensive_slang_analysis": comprehensive_slang,  # NEW - Detailed analysis
         "transcript_length": len(transcript.split()),
@@ -344,18 +350,86 @@ def simplify_text_endpoint():
         }), 500
 
 @analysis_routes.route("/test-slang", methods=["POST"])
-def test_slang_detection():
+def test_slang():
     """Test endpoint for slang detection"""
     data = request.get_json()
-    test_text = data.get("text", "")
+    text = data.get("text", "")
     
-    if not test_text:
+    if not text:
         return jsonify({"error": "No text provided"}), 400
     
-    result = get_comprehensive_slang_analysis(test_text)
+    # Test with enhanced detector
+    detected_slang = enhanced_detector.detect_slang(text)
     
     return jsonify({
-        "status": "success",
-        "input_text": test_text,
-        "analysis": result
+        "text": text,
+        "detected_slang": detected_slang,
+        "count": len(detected_slang)
     })
+
+@analysis_routes.route("/analyze-formality", methods=["POST"])
+def analyze_text_formality():
+    """Dedicated endpoint for formality analysis"""
+    try:
+        data = request.get_json()
+        text = data.get("text", "")
+        
+        if not text or not text.strip():
+            return jsonify({"error": "No text provided"}), 400
+        
+        # Perform formality analysis
+        formality_result = analyze_formality(text)
+        
+        return jsonify({
+            "text": text,
+            "formality_analysis": formality_result,
+            "explicit_formality_breakdown": {
+                "level": formality_result['formality_level'].upper(),
+                "confidence_percentage": round(formality_result['confidence'] * 100, 1),
+                "detailed_indicators": formality_result['indicators'],
+                "explanation": formality_result['summary'],
+                "score_breakdown": formality_result['details']['formality_distribution']
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({"error": f"Analysis failed: {str(e)}"}), 500
+
+@analysis_routes.route("/sms-chat", methods=["POST"])
+def sms_chat_endpoint():
+    """SMS-style conversational chatbot for English comprehension practice"""
+    try:
+        data = request.get_json()
+        user_message = data.get("message", "")
+        
+        if not user_message or not user_message.strip():
+            return jsonify({"error": "No message provided"}), 400
+        
+        # Get SMS-style bot response with cultural slang
+        bot_response = get_sms_bot_response(user_message)
+        
+        return jsonify({
+            "user_message": user_message,
+            "bot_response": bot_response,
+            "chat_type": "sms_style",
+            "learning_focus": "cultural_slang_and_idioms",
+            "timestamp": data.get("timestamp")
+        })
+        
+    except Exception as e:
+        return jsonify({"error": f"SMS chat failed: {str(e)}"}), 500
+
+@analysis_routes.route("/practice-suggestion", methods=["GET"])
+def get_practice_suggestion_endpoint():
+    """Get slang practice suggestions for English learners"""
+    try:
+        suggestion = get_practice_suggestion()
+        
+        return jsonify({
+            "practice_suggestion": suggestion,
+            "type": "slang_practice",
+            "purpose": "english_comprehension_practice"
+        })
+        
+    except Exception as e:
+        return jsonify({"error": f"Failed to get practice suggestion: {str(e)}"}), 500

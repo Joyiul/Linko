@@ -3,6 +3,7 @@ import EmojiToneBar from '../components/EmojiToneBar';
 import HighlightedText from '../components/HighlightedText';
 import TextSimplificationBox from '../components/TextSimplificationBox';
 import EmotionImage from '../components/EmotionImage';
+import FormalityAnalysis from '../components/FormalityAnalysis';
 import './AnalysisPage.css';
 
 export default function AnalysisPage() {
@@ -369,6 +370,21 @@ export default function AnalysisPage() {
           <TextSimplificationBox 
             originalText={results.transcript} 
             initialSimplification={analysis.text_simplification}
+          />
+        </div>
+      )}
+
+      {/* Formality Analysis Section */}
+      {results.transcript && (
+        <div style={{ marginBottom: '30px' }}>
+          <FormalityAnalysis 
+            text={results.transcript}
+            initialData={analysis.formality_analysis ? { 
+              formality_analysis: analysis.formality_analysis,
+              explicit_formality_breakdown: analysis.explicit_formality_breakdown,
+              success: true 
+            } : null}
+            showTitle={true}
           />
         </div>
       )}

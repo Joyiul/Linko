@@ -12,6 +12,7 @@ from werkzeug.utils import secure_filename
 import tempfile
 import uuid
 from processing.facial_analysis import FacialFeatureAnalyzer
+from processing.video_multimodal_analysis import create_video_multimodal_analyzer
 
 # Import the complete multimodal analyzer
 import sys
@@ -23,6 +24,7 @@ facial_routes = Blueprint('facial_routes', __name__)
 # Initialize analyzers
 facial_analyzer = FacialFeatureAnalyzer()
 multimodal_analyzer = MultimodalEmotionAnalyzer()
+video_multimodal_analyzer = create_video_multimodal_analyzer(multimodal_analyzer)
 
 # Configuration
 UPLOAD_FOLDER = 'uploads'
@@ -118,17 +120,24 @@ def analyze_image():
 
 @facial_routes.route('/analyze-video', methods=['POST'])
 def analyze_video():
-    """Analyze facial emotion in uploaded video."""
+    """Analyze emotions in uploaded video using multimodal analysis (facial + audio)."""
     try:
         create_upload_folder()
         
+        # Debug logging
+        print(f"🔍 DEBUG: Request files: {list(request.files.keys())}")
+        print(f"🔍 DEBUG: Request form: {dict(request.form)}")
+        print(f"🔍 DEBUG: Content type: {request.content_type}")
+        
         if 'video' not in request.files:
+            print(f"❌ DEBUG: 'video' key not found in files: {list(request.files.keys())}")
             return jsonify({
                 'success': False,
                 'error': 'No video file provided'
             }), 400
         
         file = request.files['video']
+        
         if file.filename == '':
             return jsonify({
                 'success': False,
@@ -141,122 +150,110 @@ def analyze_video():
                 'error': 'Invalid video file type. Supported formats: mp4, avi, mov, mkv, webm'
             }), 400
         
-        # Save uploaded file temporarily
+        # Save uploaded video
         filename = secure_filename(f"{uuid.uuid4()}_{file.filename}")
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         file.save(filepath)
         
         try:
-            # Extract frames from video and analyze each
-            import cv2
+            # Get fusion strategy from request
+            fusion_strategy = request.form.get('fusion_strategy', 'weighted_average')
+            if fusion_strategy not in ['weighted_average', 'max_confidence', 'voting']:
+                fusion_strategy = 'weighted_average'
             
-            cap = cv2.VideoCapture(filepath)
-            frame_results = []
-            frame_count = 0
-            max_frames = 30  # Analyze up to 30 frames
-            skip_frames = 10  # Skip frames to speed up processing
+            # Perform enhanced multimodal video analysis
+            results = video_multimodal_analyzer.analyze_video_multimodal(
+                filepath, 
+                fusion_strategy
+            )
             
-            fps = cap.get(cv2.CAP_PROP_FPS) or 30
-            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-            
-            current_frame = 0
-            while cap.read()[0] and len(frame_results) < max_frames:
-                ret, frame = cap.read()
-                if not ret:
-                    break
-                
-                if current_frame % skip_frames == 0:
-                    # Save frame temporarily for analysis
-                    frame_filename = f"temp_frame_{current_frame}.jpg"
-                    frame_filepath = os.path.join(UPLOAD_FOLDER, frame_filename)
-                    cv2.imwrite(frame_filepath, frame)
-                    
-                    try:
-                        # Analyze this frame
-                        frame_analysis = multimodal_analyzer.analyze_facial_emotion(frame_filepath)
-                        
-                        if frame_analysis:
-                            timestamp = current_frame / fps
-                            frame_results.append({
-                                'frame_number': current_frame,
-                                'timestamp': round(timestamp, 2),
-                                'faces_detected': len(frame_analysis),
-                                'primary_emotion': frame_analysis[0]['emotion'],
-                                'confidence': round(frame_analysis[0]['confidence'], 4),
-                                'all_faces': [{
-                                    'emotion': face['emotion'],
-                                    'confidence': round(face['confidence'], 4),
-                                    'bounding_box': {
-                                        'x': int(face['bbox'][0]),
-                                        'y': int(face['bbox'][1]),
-                                        'width': int(face['bbox'][2]),
-                                        'height': int(face['bbox'][3])
-                                    }
-                                } for face in frame_analysis]
-                            })
-                    
-                    finally:
-                        # Clean up frame file
-                        if os.path.exists(frame_filepath):
-                            os.remove(frame_filepath)
-                
-                current_frame += 1
-            
-            cap.release()
-            
-            if not frame_results:
+            # Check for errors
+            if 'error' in results:
                 return jsonify({
-                    'success': True,
-                    'message': 'No faces detected in video',
-                    'video_info': {
-                        'total_frames': total_frames,
-                        'fps': fps,
-                        'duration_seconds': round(total_frames / fps, 2)
-                    },
-                    'analysis_results': {
-                        'frames_analyzed': 0,
-                        'faces_detected_total': 0,
-                        'dominant_emotion': 'none',
-                        'confidence': 0.0
-                    }
-                })
+                    'success': False,
+                    'error': results['error']
+                }), 500
             
-            # Aggregate results
-            all_emotions = [result['primary_emotion'] for result in frame_results]
-            all_confidences = [result['confidence'] for result in frame_results]
+            # Extract results
+            facial_analysis = results.get('facial_analysis', {})
+            audio_analysis = results.get('audio_analysis')
+            multimodal_fusion = results.get('multimodal_fusion', {})
+            video_info = results.get('video_info', {})
+            processing_info = results.get('processing_info', {})
             
-            # Find most common emotion
-            from collections import Counter
-            emotion_counts = Counter(all_emotions)
-            dominant_emotion = emotion_counts.most_common(1)[0][0]
-            
-            # Calculate average confidence for dominant emotion
-            dominant_confidences = [conf for emotion, conf in zip(all_emotions, all_confidences) 
-                                  if emotion == dominant_emotion]
-            avg_confidence = sum(dominant_confidences) / len(dominant_confidences)
-            
-            return jsonify({
+            # Format response with comprehensive analysis
+            response = {
                 'success': True,
-                'video_info': {
-                    'total_frames': total_frames,
-                    'fps': fps,
-                    'duration_seconds': round(total_frames / fps, 2)
-                },
+                'video_info': video_info,
+                'processing_info': processing_info,
                 'analysis_results': {
-                    'frames_analyzed': len(frame_results),
-                    'faces_detected_total': sum(r['faces_detected'] for r in frame_results),
-                    'dominant_emotion': dominant_emotion,
-                    'confidence': round(avg_confidence, 4),
-                    'emotion_distribution': dict(emotion_counts),
-                    'frame_by_frame': frame_results
-                },
-                'summary': f"Analyzed {len(frame_results)} frames. Dominant emotion: {dominant_emotion} ({avg_confidence:.1%} confidence)"
-            })
+                    'final_emotion': multimodal_fusion.get('final_emotion', 'neutral'),
+                    'confidence': multimodal_fusion.get('confidence', 0.0),
+                    'fusion_method': multimodal_fusion.get('fusion_method', 'unknown'),
+                    'modalities_agreement': multimodal_fusion.get('modalities_agreement'),
+                    
+                    # Facial analysis results
+                    'facial_analysis': {
+                        'frames_analyzed': facial_analysis.get('frames_analyzed', 0),
+                        'faces_detected_total': facial_analysis.get('faces_detected_total', 0),
+                        'dominant_emotion': facial_analysis.get('dominant_emotion'),
+                        'facial_confidence': facial_analysis.get('confidence'),
+                        'emotion_distribution': facial_analysis.get('emotion_distribution', {}),
+                        'frame_by_frame': facial_analysis.get('frame_results', [])
+                    },
+                    
+                    # Audio analysis results
+                    'audio_analysis': {
+                        'analyzed': audio_analysis is not None,
+                        'emotion': audio_analysis.get('emotion') if audio_analysis else None,
+                        'confidence': audio_analysis.get('confidence') if audio_analysis else None,
+                        'analysis_method': audio_analysis.get('analysis_method') if audio_analysis else None,
+                        'all_predictions': audio_analysis.get('all_predictions', {}) if audio_analysis else {}
+                    },
+                    
+                    # Multimodal fusion details
+                    'multimodal_details': {
+                        'facial_contribution': multimodal_fusion.get('facial_contribution'),
+                        'audio_contribution': multimodal_fusion.get('audio_contribution'),
+                        'fusion_strategy': fusion_strategy,
+                        'modalities_used': []
+                    }
+                }
+            }
+            
+            # Determine which modalities were successfully used
+            if facial_analysis.get('faces_detected_total', 0) > 0:
+                response['analysis_results']['multimodal_details']['modalities_used'].append('facial')
+            if audio_analysis and audio_analysis.get('emotion'):
+                response['analysis_results']['multimodal_details']['modalities_used'].append('audio')
+            
+            # Generate comprehensive summary
+            summary_parts = []
+            if multimodal_fusion.get('final_emotion'):
+                final_emotion = multimodal_fusion['final_emotion']
+                confidence = multimodal_fusion.get('confidence', 0)
+                summary_parts.append(f"Overall emotion detected: {final_emotion} (confidence: {confidence:.2f})")
+            
+            if processing_info.get('audio_extracted') and processing_info.get('audio_analyzed'):
+                summary_parts.append("Both facial expressions and audio were analyzed for comprehensive results")
+            elif facial_analysis.get('faces_detected_total', 0) > 0:
+                summary_parts.append("Facial expression analysis completed successfully")
+            elif processing_info.get('audio_analyzed'):
+                summary_parts.append("Audio emotion analysis completed")
+            else:
+                summary_parts.append("Video processed - limited emotion detection")
+            
+            response['summary'] = ". ".join(summary_parts) if summary_parts else "Video analysis completed"
+            
+            return jsonify(response)
             
         finally:
             # Clean up uploaded video file
             if os.path.exists(filepath):
                 os.remove(filepath)
+            
+            # Clean up any temporary files from processing
+            video_multimodal_analyzer.cleanup_temp_files()
     
     except Exception as e:
         import traceback
@@ -264,6 +261,150 @@ def analyze_video():
         return jsonify({
             'success': False,
             'error': f'Video analysis failed: {str(e)}'
+        }), 500
+
+@facial_routes.route('/analyze-video-multimodal', methods=['POST'])
+def analyze_video_multimodal():
+    """Enhanced video analysis with explicit multimodal processing for research and advanced use cases."""
+    try:
+        create_upload_folder()
+        
+        if 'video' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No video file provided'
+            }), 400
+        
+        file = request.files['video']
+        
+        if file.filename == '':
+            return jsonify({
+                'success': False,
+                'error': 'No video file selected'
+            }), 400
+        
+        if not allowed_file(file.filename, ALLOWED_VIDEO_EXTENSIONS):
+            return jsonify({
+                'success': False,
+                'error': 'Invalid video file type'
+            }), 400
+        
+        # Save uploaded video
+        filename = secure_filename(f"{uuid.uuid4()}_{file.filename}")
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+        
+        try:
+            # Get advanced parameters
+            fusion_strategy = request.form.get('fusion_strategy', 'weighted_average')
+            max_frames = int(request.form.get('max_frames', 30))
+            skip_frames = int(request.form.get('skip_frames', 10))
+            include_frame_details = request.form.get('include_frame_details', 'true').lower() == 'true'
+            
+            if fusion_strategy not in ['weighted_average', 'max_confidence', 'voting']:
+                fusion_strategy = 'weighted_average'
+            
+            # Perform comprehensive multimodal analysis
+            results = video_multimodal_analyzer.analyze_video_multimodal(
+                filepath, 
+                fusion_strategy
+            )
+            
+            if 'error' in results:
+                return jsonify({
+                    'success': False,
+                    'error': results['error']
+                }), 500
+            
+            # Enhanced response with detailed breakdown
+            facial_analysis = results.get('facial_analysis', {})
+            audio_analysis = results.get('audio_analysis')
+            multimodal_fusion = results.get('multimodal_fusion', {})
+            video_info = results.get('video_info', {})
+            processing_info = results.get('processing_info', {})
+            
+            response = {
+                'success': True,
+                'analysis_type': 'comprehensive_multimodal',
+                'video_metadata': video_info,
+                'processing_details': processing_info,
+                
+                # Final multimodal results
+                'final_analysis': {
+                    'emotion': multimodal_fusion.get('final_emotion', 'neutral'),
+                    'confidence': round(multimodal_fusion.get('confidence', 0.0), 4),
+                    'fusion_method': multimodal_fusion.get('fusion_method', 'unknown'),
+                    'modalities_agreement': multimodal_fusion.get('modalities_agreement'),
+                    'analysis_quality': 'high' if multimodal_fusion.get('confidence', 0) > 0.7 else 'medium' if multimodal_fusion.get('confidence', 0) > 0.4 else 'low'
+                },
+                
+                # Detailed facial analysis
+                'facial_emotion_analysis': {
+                    'summary': {
+                        'frames_processed': facial_analysis.get('frames_analyzed', 0),
+                        'total_faces_detected': facial_analysis.get('faces_detected_total', 0),
+                        'dominant_emotion': facial_analysis.get('dominant_emotion'),
+                        'average_confidence': facial_analysis.get('confidence'),
+                        'emotion_distribution': facial_analysis.get('emotion_distribution', {})
+                    },
+                    'temporal_analysis': facial_analysis.get('frame_results', []) if include_frame_details else []
+                },
+                
+                # Detailed audio analysis
+                'audio_emotion_analysis': {
+                    'processed': audio_analysis is not None,
+                    'emotion_detected': audio_analysis.get('emotion') if audio_analysis else None,
+                    'confidence': round(audio_analysis.get('confidence', 0), 4) if audio_analysis else None,
+                    'analysis_method': audio_analysis.get('analysis_method') if audio_analysis else None,
+                    'emotion_probabilities': audio_analysis.get('all_predictions', {}) if audio_analysis else {}
+                },
+                
+                # Fusion analysis
+                'multimodal_fusion_details': {
+                    'strategy_used': fusion_strategy,
+                    'facial_contribution': multimodal_fusion.get('facial_contribution'),
+                    'audio_contribution': multimodal_fusion.get('audio_contribution'),
+                    'modalities_analyzed': [],
+                    'fusion_confidence': round(multimodal_fusion.get('confidence', 0), 4),
+                    'agreement_score': 1.0 if multimodal_fusion.get('modalities_agreement') else 0.0 if multimodal_fusion.get('modalities_agreement') is False else None
+                }
+            }
+            
+            # Determine analyzed modalities
+            if facial_analysis.get('faces_detected_total', 0) > 0:
+                response['multimodal_fusion_details']['modalities_analyzed'].append('facial_expressions')
+            if audio_analysis and audio_analysis.get('emotion'):
+                response['multimodal_fusion_details']['modalities_analyzed'].append('audio_prosody')
+            
+            # Research-grade summary
+            modalities = response['multimodal_fusion_details']['modalities_analyzed']
+            final_emotion = response['final_analysis']['emotion']
+            confidence = response['final_analysis']['confidence']
+            
+            if len(modalities) == 2:
+                agreement = "with agreement" if response['multimodal_fusion_details']['agreement_score'] == 1.0 else "with disagreement"
+                summary = f"Multimodal analysis using {' and '.join(modalities)} detected {final_emotion} emotion (confidence: {confidence:.2f}) {agreement} between modalities"
+            elif len(modalities) == 1:
+                summary = f"Single-modality analysis using {modalities[0]} detected {final_emotion} emotion (confidence: {confidence:.2f})"
+            else:
+                summary = f"Limited analysis completed - {final_emotion} emotion detected with low confidence ({confidence:.2f})"
+            
+            response['research_summary'] = summary
+            
+            return jsonify(response)
+            
+        finally:
+            # Cleanup
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            video_multimodal_analyzer.cleanup_temp_files()
+    
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'Multimodal video analysis failed: {str(e)}'
         }), 500
 
 @facial_routes.route('/multimodal-analysis', methods=['POST'])
@@ -446,6 +587,63 @@ def facial_test():
         return jsonify({
             'success': False,
             'error': f'Test failed: {str(e)}'
+        }), 500
+
+@facial_routes.route('/upload', methods=['POST'])
+def upload_audio():
+    """Handle audio file upload and perform speech-to-text conversion."""
+    try:
+        create_upload_folder()
+        
+        if 'audio' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No audio file provided'
+            }), 400
+        
+        file = request.files['audio']
+        
+        if file.filename == '':
+            return jsonify({
+                'success': False,
+                'error': 'No audio file selected'
+            }), 400
+        
+        # Save uploaded audio
+        filename = secure_filename(f"{uuid.uuid4()}_{file.filename}")
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+        
+        try:
+            # For now, provide a basic transcript as speech-to-text is not implemented
+            # In a production system, you would use services like Google Speech-to-Text,
+            # Azure Speech Services, or implement Whisper for local processing
+            
+            transcript = "Audio transcript would appear here in a production system with speech-to-text capabilities."
+            
+            # Provide encouraging feedback for audio submission
+            response = {
+                'success': True,
+                'transcript': transcript,
+                'message': 'Audio received successfully',
+                'audio_info': {
+                    'filename': file.filename,
+                    'size': os.path.getsize(filepath),
+                    'format': 'webm'
+                }
+            }
+            
+            return jsonify(response)
+            
+        finally:
+            # Clean up uploaded file
+            if os.path.exists(filepath):
+                os.remove(filepath)
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Audio processing failed: {str(e)}'
         }), 500
 
 @facial_routes.route('/system-info', methods=['GET'])

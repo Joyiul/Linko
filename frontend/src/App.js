@@ -7,7 +7,6 @@ import VideoPage from './pages/VideoPage';
 import ChatPage from './pages/ChatPage';
 import LearningLibraryPage from './pages/LearningLibraryPage';
 import LearnersBasePage from './pages/LearnersBasePage';
-import EmotionAccuracyDemo from './components/EmotionAccuracyDemo';
 import Logo from './components/Logo';
 import LinkoLogo from './components/LinkoLogo';
 import { theme } from './theme';
@@ -186,34 +185,6 @@ function Navbar() {
             Learning Library
           </Link>
           <Link 
-            to="/emotion-demo" 
-            style={{ 
-              color: theme.colors.onBackground, 
-              textDecoration: 'none', 
-              fontWeight: '600',
-              fontFamily: theme.typography.button.fontFamily,
-              padding: '12px 20px',
-              borderRadius: theme.borderRadius.bubble,
-              transition: 'all 0.3s ease',
-              fontSize: theme.typography.button.fontSize,
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(255,255,255,0.25)';
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = theme.shadows.light;
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(255,255,255,0.1)';
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
-            }}
-          >
-            Emotion Demo
-          </Link>
-          <Link 
             to="/chat" 
             style={{ 
               color: theme.colors.onBackground, 
@@ -297,7 +268,6 @@ function App() {
             <Route path="/videos" element={<VideoPage />} />
             <Route path="/learning-library" element={<LearningLibraryPage />} />
             <Route path="/learners-base" element={<LearnersBasePage />} />
-            <Route path="/emotion-demo" element={<EmotionAccuracyDemo />} />
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/" element={<HomePage />} />
           </Routes>
