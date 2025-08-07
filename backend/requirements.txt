@@ -1,3 +1,9 @@
-Flask
+Flask>=2.0.0
 flask-cors
 Werkzeug
+gunicorn
+numpy
+scipy
+scikit-learn
+pandas
+requests

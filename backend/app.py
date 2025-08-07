@@ -18,5 +18,10 @@ app.register_blueprint(analysis_routes)
 app.register_blueprint(facial_routes)
 app.register_blueprint(learning_library_bp, url_prefix='/learning-library')
 
+# Health check endpoint for deployment
+@app.route('/health')
+def health_check():
+    return {'status': 'healthy', 'service': 'ImmigrantSlangster API'}, 200
+
 if __name__ == '__main__':
     app.run(debug=True, port=5002, host='0.0.0.0')
