@@ -14,10 +14,10 @@ import { theme } from './theme';
 function Navbar() {
   return (
     <nav style={{
-      background: theme.colors.heroGradient,
+      background: 'linear-gradient(135deg, #90EE90 0%, #98FB98 100%)', // Light green gradient
       padding: '20px 0',
       boxShadow: theme.shadows.bubble,
-      borderBottom: `3px solid ${theme.colors.primaryDark}`,
+      borderBottom: `3px solid #32CD32`, // Lime green border
       borderRadius: '0 0 24px 24px'
     }}>
       <div style={{ 
@@ -47,7 +47,7 @@ function Navbar() {
           <Link 
             to="/" 
             style={{ 
-              color: theme.colors.onBackground, 
+              color: 'white', // Changed to white
               textDecoration: 'none', 
               fontWeight: '600',
               fontFamily: theme.typography.button.fontFamily,
@@ -75,7 +75,7 @@ function Navbar() {
           <Link 
             to="/listen" 
             style={{ 
-              color: theme.colors.onBackground, 
+              color: 'white', // Changed to white
               textDecoration: 'none', 
               fontWeight: '600',
               fontFamily: theme.typography.button.fontFamily,
@@ -103,7 +103,7 @@ function Navbar() {
           <Link 
             to="/analyze" 
             style={{ 
-              color: theme.colors.onBackground, 
+              color: 'white', // Changed to white
               textDecoration: 'none', 
               fontWeight: '600',
               fontFamily: theme.typography.button.fontFamily,
@@ -131,7 +131,7 @@ function Navbar() {
           <Link 
             to="/videos" 
             style={{ 
-              color: theme.colors.onBackground, 
+              color: 'white', // Changed to white
               textDecoration: 'none', 
               fontWeight: '600',
               fontFamily: theme.typography.button.fontFamily,
@@ -159,7 +159,7 @@ function Navbar() {
           <Link 
             to="/learning-library" 
             style={{ 
-              color: theme.colors.onBackground, 
+              color: 'white', // Changed to white
               textDecoration: 'none', 
               fontWeight: '600',
               fontFamily: theme.typography.button.fontFamily,
@@ -187,7 +187,7 @@ function Navbar() {
           <Link 
             to="/chat" 
             style={{ 
-              color: theme.colors.onBackground, 
+              color: 'white', // Changed to white
               textDecoration: 'none', 
               fontWeight: '600',
               fontFamily: theme.typography.button.fontFamily,

@@ -9,16 +9,46 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import tensorflow as tf
 from tensorflow import keras
 import traceback
+import re
 
 class RobustEmotionAnalyzer:
     def __init__(self):
-        """Initialize robust emotion analyzer with error handling"""
+        """Initialize robust emotion analyzer with enhanced emoji detection"""
         self.text_analyzer = SentimentIntensityAnalyzer()
         self.models_loaded = False
         self.audio_model = None
         self.audio_encoder = None
         
-        # Define emotion mappings with enhanced patterns
+        # Load emoji mappings for tone detection
+        self.emoji_emotions = self._load_emoji_mappings()
+        
+        # Define comprehensive emotion-emoji mappings
+        self.emotion_emojis = {
+            'happy': ['😊', '😀', '😁', '😄', '😆', '🙂', '😋', '🤗', '😇', '🥰', '😍', '🤩', '😘', '😗', '😙', '😚', '🤭'],
+            'excited': ['😃', '😆', '🤩', '🤗', '🎉', '🙌', '👏', '🔥', '⚡', '✨', '💫', '🌟', '🎊', '🥳'],
+            'love': ['😍', '🥰', '😘', '💕', '💖', '💗', '💓', '💝', '❤️', '🧡', '💛', '💚', '💙', '💜', '🤍', '🖤'],
+            'angry': ['😠', '😡', '🤬', '😤', '💢', '👿', '🔥', '💯', '🤯'],
+            'sad': ['😢', '😭', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😪'],
+            'disappointed': ['😞', '😔', '😟', '😕', '🙁', '☹️', '😤', '😮‍💨', '😒', '🫤'],
+            'fear': ['😨', '😰', '😱', '🤯', '😧', '😦', '😮', '🫢', '🙀', '🫣'],
+            'surprise': ['😮', '😯', '😲', '🤯', '😳', '🫢', '🤭', '😱', '🙀', '‼️', '❗', '❓', '❔'],
+            'disgust': ['🤢', '🤮', '😷', '🤧', '🤒', '😵', '🤐', '🙄', '😒', '😑'],
+            'neutral': ['😐', '😑', '🙂', '😶', '🫤', '😕', '🤷', '🤷‍♀️', '🤷‍♂️'],
+            'confused': ['😕', '🤔', '🫤', '😵‍💫', '🤯', '🫨', '😵', '❓', '❔'],
+            'laughing': ['😂', '🤣', '😆', '😹', '💀', '☠️', '😄', '😁'],
+            'cool': ['😎', '🤠', '🕶️', '😏', '🤘', '👌', '🔥', '💯'],
+            'crying': ['😭', '😢', '🥺', '😿', '😾'],
+            'sleeping': ['😴', '💤', '🛌', '😪'],
+            'sick': ['🤢', '🤮', '😷', '🤧', '🤒', '🥵', '🥶'],
+            'party': ['🥳', '🎉', '🎊', '🍾', '🥂', '🍻', '🎈', '🎁'],
+            'thinking': ['🤔', '💭', '🧠', '💡', '🔍'],
+            'shocked': ['😱', '🤯', '😳', '🫢', '😲', '😮', '😯', '🙀'],
+            'embarrassed': ['😳', '😅', '🤭', '🫣', '😊', '🤗', '😌'],
+            'flirty': ['😉', '😏', '😘', '😗', '💋', '💕', '🥰', '😍'],
+            'sarcastic': ['🙃', '😏', '🙄', '😒', '🤨', '😑']
+        }
+        
+        # Define emotion patterns with enhanced emoji context
         self.emotion_patterns = {
             'happy': {
                 'keywords': ['happy', 'joy', 'joyful', 'wonderful', 'great', 'awesome', 'fantastic', 'love', 'smile', 'glad', 'cheerful', 'delighted', 'content'],

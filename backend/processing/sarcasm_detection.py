@@ -759,30 +759,47 @@ Focus on identifying the specific words/phrases being used ironically or sarcast
         return highlighted_text
 
     def get_sarcasm_explanation(self, sarcasm_result):
-        """Generate a human-readable explanation of detected sarcasm"""
+        """Generate a human-readable explanation of detected sarcasm with reactions"""
         if not sarcasm_result['sarcasm_detected']:
             return "No sarcasm detected. The message appears to be literal."
         
-        explanation = f"🎭 **Sarcasm detected!** (Confidence: {sarcasm_result['confidence']:.1%})\n\n"
+        confidence_level = sarcasm_result['confidence']
         
-        if sarcasm_result['sarcasm_type'] == 'economic':
-            explanation += "This appears to be **economic sarcasm** - the speaker is expressing frustration about financial struggles using positive language ironically.\n\n"
-        elif sarcasm_result['sarcasm_type'] == 'work_related':
-            explanation += "This appears to be **work-related sarcasm** - expressing dissatisfaction with job conditions using ironic positive language.\n\n"
-        elif sarcasm_result['sarcasm_type'] == 'frustrated':
-            explanation += "This appears to be **frustrated sarcasm** - the speaker is using positive words sarcastically while describing a negative situation or being stuck.\n\n"
-        elif sarcasm_result['sarcasm_type'] == 'contradiction':
-            explanation += "This uses **contradictory language** - positive words in a negative context to express the opposite meaning.\n\n"
-        elif sarcasm_result['sarcasm_type'] == 'explicit_phrase':
-            explanation += "This contains **explicit sarcastic phrases** commonly used to express irony.\n\n"
+        # Add reaction based on confidence and type
+        if confidence_level >= 0.8:
+            explanation = f"🎭 **Strong sarcasm detected!** (Confidence: {confidence_level:.1%}) 🔥\n\n"
+        elif confidence_level >= 0.6:
+            explanation = f"🎭 **Sarcasm detected!** (Confidence: {confidence_level:.1%}) 👀\n\n"
         else:
-            explanation += "This contains **sarcastic language patterns** that suggest ironic meaning.\n\n"
+            explanation = f"🎭 **Possible sarcasm detected** (Confidence: {confidence_level:.1%}) 🤔\n\n"
         
-        explanation += "**Why this is sarcasm:**\n"
+        # Add specific reactions based on sarcasm type
+        if sarcasm_result['sarcasm_type'] == 'economic':
+            explanation += "💸 **Economic sarcasm detected!** - This person is expressing financial frustration using ironic positive language. They're probably struggling with money but saying the opposite of what they mean.\n\n"
+        elif sarcasm_result['sarcasm_type'] == 'work_related':
+            explanation += "💼 **Work-related sarcasm detected!** - Someone's expressing job dissatisfaction through ironic language. They're likely frustrated with their work situation.\n\n"
+        elif sarcasm_result['sarcasm_type'] == 'frustrated':
+            explanation += "😤 **Frustrated sarcasm detected!** - This person is using positive words sarcastically while dealing with a negative situation. They're clearly annoyed!\n\n"
+        elif sarcasm_result['sarcasm_type'] == 'contradiction':
+            explanation += "🔄 **Contradictory sarcasm detected!** - The speaker is using positive words in a negative context to express the opposite meaning.\n\n"
+        elif sarcasm_result['sarcasm_type'] == 'explicit_phrase':
+            explanation += "📢 **Explicit sarcastic phrases detected!** - This contains commonly used sarcastic expressions.\n\n"
+        else:
+            explanation += "🗣️ **Sarcastic language patterns detected!** - The text contains ironic meaning patterns.\n\n"
+        
+        explanation += "**🔍 Why this is sarcasm:**\n"
         for reason in sarcasm_result['reasons']:
-            explanation += f"• {reason}\n"
+            explanation += f"• ⚡ {reason}\n"
         
-        explanation += "\n**What they really mean:** The speaker is expressing the opposite of what they're literally saying - they're frustrated, not actually happy about their situation."
+        # Add contextual reaction
+        if 'work' in str(sarcasm_result['reasons']).lower():
+            explanation += "\n💡 **Context clue:** This appears to be work-related frustration expressed sarcastically."
+        elif 'poor' in str(sarcasm_result['reasons']).lower() or 'money' in str(sarcasm_result['reasons']).lower():
+            explanation += "\n💡 **Context clue:** This seems to be about financial struggles expressed ironically."
+        elif 'stuck' in str(sarcasm_result['reasons']).lower() or 'problem' in str(sarcasm_result['reasons']).lower():
+            explanation += "\n💡 **Context clue:** This appears to be frustration with a technical or personal problem."
+        
+        explanation += "\n\n🎯 **What they really mean:** The speaker is expressing the opposite of what they're literally saying - they're frustrated, disappointed, or upset, not actually happy about their situation!"
         
         return explanation
 

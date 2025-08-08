@@ -44,8 +44,12 @@ const FormalityAnalysis = ({ text, initialData = null, showTitle = true }) => {
       'neutral': '#6c757d',     // Gray - Neutral
       'informal': '#fd7e14',    // Orange - Conversational
       'casual': '#e83e8c',      // Pink - Very casual/Slang
+      'very formal': '#6f42c1', // Handle variations
+      'very casual': '#e83e8c',
+      'semi-formal': '#0056b3',
+      'conversational': '#fd7e14'
     };
-    return colors[level] || '#6c757d';
+    return colors[level?.toLowerCase()] || '#6c757d';
   };
 
   const getFormalityIcon = (level) => {
@@ -55,19 +59,27 @@ const FormalityAnalysis = ({ text, initialData = null, showTitle = true }) => {
       'neutral': '📝',       // Document
       'informal': '💬',      // Speech bubble
       'casual': '😎',        // Cool emoji
+      'very formal': '🎓',
+      'very casual': '😎',
+      'semi-formal': '💼',
+      'conversational': '💬'
     };
-    return icons[level] || '📝';
+    return icons[level?.toLowerCase()] || '📝';
   };
 
   const getFormalityDescription = (level) => {
     const descriptions = {
-      'formal': 'Academic/Formal language with complex structures',
+      'formal': 'Academic/formal language with complex structures',
       'professional': 'Business-appropriate professional communication',
       'neutral': 'Balanced tone without strong formality indicators',
       'informal': 'Conversational style with casual expressions',
-      'casual': 'Very relaxed with slang and informal expressions'
+      'casual': 'Very relaxed with slang and informal expressions',
+      'very formal': 'Highly academic or ceremonial language',
+      'very casual': 'Extremely relaxed with heavy slang usage',
+      'semi-formal': 'Moderately professional but approachable',
+      'conversational': 'Natural, everyday speaking style'
     };
-    return descriptions[level] || 'Formality level analysis';
+    return descriptions[level?.toLowerCase()] || 'Formality level analysis';
   };
 
   const renderIndicators = (indicators) => {
@@ -152,8 +164,12 @@ const FormalityAnalysis = ({ text, initialData = null, showTitle = true }) => {
   // If we have initial data, show it directly
   if (formalityData && !isLoading) {
     const { formality_analysis, explicit_formality_breakdown } = formalityData;
-    const level = formality_analysis?.formality_level || explicit_formality_breakdown?.level?.toLowerCase();
-    const confidence = formality_analysis?.confidence || explicit_formality_breakdown?.confidence_percentage / 100;
+    const level = formality_analysis?.formality_level || explicit_formality_breakdown?.level?.toLowerCase() || 'neutral';
+    const confidence = formality_analysis?.confidence !== undefined 
+      ? formality_analysis.confidence 
+      : explicit_formality_breakdown?.confidence_percentage !== undefined
+        ? explicit_formality_breakdown.confidence_percentage / 100
+        : 0.5; // Default fallback
 
     return (
       <div style={{
@@ -201,7 +217,7 @@ const FormalityAnalysis = ({ text, initialData = null, showTitle = true }) => {
               textTransform: 'capitalize',
               marginBottom: 4
             }}>
-              {level} Style
+              {level.replace(/\b\w/g, l => l.toUpperCase())} Style
             </div>
             <div style={{
               fontSize: 12,
@@ -214,7 +230,7 @@ const FormalityAnalysis = ({ text, initialData = null, showTitle = true }) => {
               fontSize: 11,
               color: '#6c757d'
             }}>
-              Confidence: {Math.round(confidence * 100)}%
+              Confidence: {Math.round((confidence || 0) * 100)}%
             </div>
           </div>
         </div>

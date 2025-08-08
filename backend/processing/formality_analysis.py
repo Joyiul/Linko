@@ -287,38 +287,56 @@ class FormalityAnalyzer:
         }
     
     def _generate_formality_summary(self, level, confidence, indicators):
-        """Generate a human-readable summary of formality analysis"""
+        """Generate a human-readable summary of formality analysis with reactions"""
+        # Base summaries with personality
         summaries = {
-            'formal': "This text uses formal, academic language with complex sentence structures and polite expressions.",
-            'professional': "This text uses business/corporate language with professional terminology and structured communication.",
-            'informal': "This text uses conversational language with contractions and casual expressions.",
-            'casual': "This text uses very casual language with slang, informal expressions, and relaxed tone.",
-            'neutral': "This text maintains a neutral tone without strong formality indicators."
+            'formal': "🎓 **Academic/Formal language detected!** This text uses sophisticated vocabulary, complex sentence structures, and very polite expressions. Perfect for academic or official contexts!",
+            'professional': "💼 **Professional/Business language detected!** This text uses corporate terminology and structured communication. Great for workplace environments!",
+            'informal': "💬 **Conversational language detected!** This text uses everyday language with contractions and casual expressions. Perfect for friendly conversations!",
+            'casual': "😎 **Very casual language detected!** This text uses relaxed slang, informal expressions, and a laid-back tone. Ideal for texting with friends!",
+            'neutral': "📝 **Neutral tone detected** - This text maintains a balanced approach without strong formality indicators. Versatile for many situations!"
         }
         
-        base_summary = summaries.get(level, "Formality level unclear.")
+        base_summary = summaries.get(level, "🤔 Formality level unclear.")
         
-        # Add confidence level
-        confidence_desc = ""
+        # Add confidence level with reactions
         if confidence >= 0.8:
-            confidence_desc = " (High confidence)"
+            confidence_desc = " 🎯 (High confidence - very clear indicators!)"
         elif confidence >= 0.6:
-            confidence_desc = " (Moderate confidence)"
+            confidence_desc = " ✅ (Good confidence - clear patterns detected)"
         else:
-            confidence_desc = " (Low confidence)"
+            confidence_desc = " 🔍 (Some indicators found, but not overwhelming)"
         
-        # Add key indicators
+        # Add key indicators with emojis
         key_indicators = []
         for category, items in indicators.items():
             if items and len(items) > 0:
-                key_indicators.append(f"{len(items)} {category} indicators")
+                emoji_map = {
+                    'formal': '🎓',
+                    'professional': '💼', 
+                    'informal': '💬',
+                    'casual': '😎'
+                }
+                emoji = emoji_map.get(category, '📍')
+                key_indicators.append(f"{emoji} {len(items)} {category} indicators")
         
         if key_indicators:
-            indicator_summary = f" Found: {', '.join(key_indicators)}."
+            indicator_summary = f"\n\n**🔍 Found:** {', '.join(key_indicators)}."
         else:
             indicator_summary = ""
         
-        return base_summary + confidence_desc + indicator_summary
+        # Add appropriate reactions based on formality level
+        reactions = {
+            'formal': "\n\n📚 **Reaction:** This is excellent for academic papers, official documents, or formal presentations!",
+            'professional': "\n\n💼 **Reaction:** Perfect for business emails, reports, or professional communication!",
+            'informal': "\n\n😊 **Reaction:** Great for everyday conversations, friendly emails, or casual writing!",
+            'casual': "\n\n🤙 **Reaction:** Awesome for texting, social media, or chatting with friends!",
+            'neutral': "\n\n⚖️ **Reaction:** This balanced tone works well in most situations!"
+        }
+        
+        reaction = reactions.get(level, "")
+        
+        return base_summary + confidence_desc + indicator_summary + reaction
 
 # Global instance for easy import
 formality_analyzer = FormalityAnalyzer()

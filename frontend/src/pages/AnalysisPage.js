@@ -329,33 +329,81 @@ export default function AnalysisPage() {
               )}
             </div>
             
-            {/* Sarcasm Key - only show if sarcasm is detected */}
+            {/* Enhanced Sarcasm Key - only show if sarcasm is detected */}
             {analysis.comprehensive_sarcasm_analysis && analysis.comprehensive_sarcasm_analysis.sarcasm_detected && (
               <div style={{ 
-                marginTop: '10px', 
+                marginTop: '15px', 
                 fontSize: '0.9rem', 
                 color: '#6c757d',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: '8px 12px',
-                backgroundColor: '#f8f9fa',
-                borderRadius: '5px',
-                border: '1px solid #dee2e6'
+                padding: '15px',
+                backgroundColor: '#fff3e0',
+                borderRadius: '12px',
+                border: '2px solid #ff9800',
+                boxShadow: '0 3px 12px rgba(255, 152, 0, 0.2)'
               }}>
-                <span style={{ 
-                  color: 'red', 
-                  fontWeight: 'bold',
-                  fontSize: '1.1rem'
-                }}>■</span>
-                <span>Red text indicates sarcasm</span>
-                <span style={{ 
-                  marginLeft: 'auto',
-                  fontSize: '0.8rem',
-                  color: '#999'
+                <div style={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  marginBottom: '12px'
                 }}>
-                  Confidence: {(analysis.comprehensive_sarcasm_analysis.confidence * 100).toFixed(1)}%
-                </span>
+                  <span style={{ 
+                    color: 'red', 
+                    fontWeight: 'bold',
+                    fontSize: '1.2rem'
+                  }}>■</span>
+                  <span style={{ fontWeight: 'bold', color: '#d84315' }}>
+                    🎭 Sarcasm Detection Results
+                  </span>
+                </div>
+                
+                {/* Sarcasm Type and Confidence */}
+                <div style={{ marginBottom: '10px' }}>
+                  <strong>Type:</strong> {(() => {
+                    const sarcasmType = analysis.comprehensive_sarcasm_analysis.sarcasm_type;
+                    const typeEmojis = {
+                      'economic': '💸 Financial frustration',
+                      'work_related': '💼 Work-related frustration', 
+                      'frustrated': '😤 General frustration',
+                      'contradiction': '🔄 Contradictory language',
+                      'explicit_phrase': '📢 Explicit sarcastic phrases'
+                    };
+                    return typeEmojis[sarcasmType] || '🗣️ Sarcastic patterns';
+                  })()}
+                </div>
+                
+                <div style={{ marginBottom: '10px' }}>
+                  <strong>Confidence:</strong> {(analysis.comprehensive_sarcasm_analysis.confidence * 100).toFixed(1)}%
+                  {analysis.comprehensive_sarcasm_analysis.confidence >= 0.8 && ' 🔥 (Very High)'}
+                  {analysis.comprehensive_sarcasm_analysis.confidence >= 0.6 && analysis.comprehensive_sarcasm_analysis.confidence < 0.8 && ' 👀 (High)'}
+                  {analysis.comprehensive_sarcasm_analysis.confidence < 0.6 && ' 🤔 (Moderate)'}
+                </div>
+                
+                {/* Explanation */}
+                <div style={{ 
+                  backgroundColor: 'rgba(255,255,255,0.8)',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  marginTop: '10px',
+                  fontSize: '0.85rem',
+                  lineHeight: '1.4'
+                }}>
+                  <strong>💡 What this means:</strong> Red highlighted text indicates sarcasm - the speaker is expressing the opposite of what they literally say. They're likely frustrated, disappointed, or upset, not actually happy about their situation!
+                </div>
+                
+                {/* Reasons */}
+                {analysis.comprehensive_sarcasm_analysis.reasons && analysis.comprehensive_sarcasm_analysis.reasons.length > 0 && (
+                  <div style={{ marginTop: '10px' }}>
+                    <strong>🔍 Detection reasons:</strong>
+                    <ul style={{ margin: '5px 0', paddingLeft: '20px' }}>
+                      {analysis.comprehensive_sarcasm_analysis.reasons.slice(0, 3).map((reason, index) => (
+                        <li key={index} style={{ fontSize: '0.8rem', marginBottom: '3px' }}>
+                          ⚡ {reason}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -374,7 +422,7 @@ export default function AnalysisPage() {
         </div>
       )}
 
-      {/* Formality Analysis Section */}
+      {/* Enhanced Formality Analysis Section */}
       {results.transcript && (
         <div style={{ marginBottom: '30px' }}>
           <FormalityAnalysis 
@@ -386,6 +434,126 @@ export default function AnalysisPage() {
             } : null}
             showTitle={true}
           />
+          
+          {/* Formality Reaction Box */}
+          {analysis.formality_analysis && (
+            <div style={{
+              marginTop: '15px',
+              padding: '20px',
+              backgroundColor: (() => {
+                const level = analysis.formality_analysis.formality_level;
+                const bgColors = {
+                  'formal': '#f3e5f5',
+                  'professional': '#e3f2fd', 
+                  'informal': '#fff3e0',
+                  'casual': '#fce4ec',
+                  'neutral': '#f5f5f5'
+                };
+                return bgColors[level] || '#f5f5f5';
+              })(),
+              borderRadius: '15px',
+              border: `3px solid ${(() => {
+                const level = analysis.formality_analysis.formality_level;
+                const borderColors = {
+                  'formal': '#6f42c1',
+                  'professional': '#0056b3', 
+                  'informal': '#fd7e14',
+                  'casual': '#e83e8c',
+                  'neutral': '#6c757d'
+                };
+                return borderColors[level] || '#6c757d';
+              })()}`,
+              boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+              textAlign: 'center'
+            }}>
+              <h3 style={{
+                margin: '0 0 15px 0',
+                color: '#495057',
+                fontSize: '1.3rem'
+              }}>
+                🎯 Formality Analysis Reaction
+              </h3>
+              
+              <div style={{
+                fontSize: '3rem',
+                marginBottom: '10px'
+              }}>
+                {(() => {
+                  const level = analysis.formality_analysis.formality_level;
+                  const emojis = {
+                    'formal': '🎓',
+                    'professional': '💼', 
+                    'informal': '💬',
+                    'casual': '😎',
+                    'neutral': '⚖️'
+                  };
+                  return emojis[level] || '📝';
+                })()}
+              </div>
+              
+              <div style={{
+                fontSize: '1.4rem',
+                fontWeight: 'bold',
+                color: (() => {
+                  const level = analysis.formality_analysis.formality_level;
+                  const colors = {
+                    'formal': '#6f42c1',
+                    'professional': '#0056b3', 
+                    'informal': '#fd7e14',
+                    'casual': '#e83e8c',
+                    'neutral': '#6c757d'
+                  };
+                  return colors[level] || '#6c757d';
+                })(),
+                marginBottom: '10px',
+                textTransform: 'capitalize'
+              }}>
+                {analysis.formality_analysis.formality_level} Communication Style
+              </div>
+              
+              <div style={{
+                fontSize: '1rem',
+                color: '#6c757d',
+                marginBottom: '15px',
+                lineHeight: '1.5'
+              }}>
+                {(() => {
+                  const level = analysis.formality_analysis.formality_level;
+                  const confidence = Math.round((analysis.formality_analysis.confidence || 0) * 100);
+                  const reactions = {
+                    'formal': `🎓 **Excellent for academic writing!** This formal style (${confidence}% confidence) is perfect for research papers, official documents, or scholarly presentations. Very sophisticated language use!`,
+                    'professional': `💼 **Perfect for business communication!** This professional style (${confidence}% confidence) works great for emails, reports, presentations, or workplace interactions. Well-structured and appropriate!`,
+                    'informal': `💬 **Great for everyday conversations!** This conversational style (${confidence}% confidence) is ideal for casual emails, friendly discussions, or social interactions. Natural and approachable!`,
+                    'casual': `😎 **Awesome for relaxed communication!** This casual style (${confidence}% confidence) is perfect for texting friends, social media, or informal chats. Fun and expressive!`,
+                    'neutral': `⚖️ **Versatile balanced style!** This neutral tone (${confidence}% confidence) works well in most situations and contexts. Flexible and appropriate for many uses!`
+                  };
+                  return reactions[level] || `📝 Communication style detected with ${confidence}% confidence.`;
+                })()}
+              </div>
+              
+              {/* Usage Recommendations */}
+              <div style={{
+                backgroundColor: 'rgba(255,255,255,0.8)',
+                padding: '12px',
+                borderRadius: '10px',
+                fontSize: '0.9rem',
+                color: '#495057'
+              }}>
+                <strong>💡 Best used for:</strong>
+                {(() => {
+                  const level = analysis.formality_analysis.formality_level;
+                  const recommendations = {
+                    'formal': ' Academic papers, official documents, formal presentations, scholarly articles',
+                    'professional': ' Business emails, workplace reports, professional presentations, corporate communication',
+                    'informal': ' Friendly emails, casual conversations, social interactions, everyday communication',
+                    'casual': ' Text messages, social media posts, chatting with friends, informal discussions',
+                    'neutral': ' General writing, versatile communication, mixed audiences, flexible contexts'
+                  };
+                  return recommendations[level] || ' Various communication contexts';
+                })()}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -496,7 +664,7 @@ export default function AnalysisPage() {
           color: '#6c757d',
           fontStyle: 'italic'
         }}>
-          ⚠️ This response was generated using AI. Please use responsibly.
+          Please be aware that all these responses have been generated with AI.
         </p>
       </div>
     </div>

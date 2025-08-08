@@ -177,7 +177,7 @@ export default function ChatPage() {
       return <span dangerouslySetInnerHTML={{ __html: formattedText }} />;
     }
 
-    // Highlight user messages with analysis
+    // Enhanced highlighting for user messages with analysis
     if (!message.analysis) {
       return <span>{message.text}</span>;
     }
@@ -194,14 +194,81 @@ export default function ChatPage() {
       );
     });
 
-    // Enhanced sarcasm detection
+    // Enhanced sarcasm detection with reactions
     const tone = message.analysis.tone?.toLowerCase() || '';
-    const hasSarcasm = message.analysis.sarcasm_analysis?.sarcasm_detected || tone.includes('sarcastic');
+    const hasSarcasm = message.analysis.sarcasm_analysis?.sarcasm_detected || 
+                      message.analysis.comprehensive_sarcasm_analysis?.sarcasm_detected || 
+                      tone.includes('sarcastic');
     
     if (hasSarcasm) {
-      const confidence = message.analysis.sarcasm_analysis?.confidence || 0.5;
+      const sarcasmData = message.analysis.comprehensive_sarcasm_analysis || message.analysis.sarcasm_analysis;
+      const confidence = sarcasmData?.confidence || 0.5;
       const confidencePercent = Math.round(confidence * 100);
-      highlightedText = `<span class="sarcasm-highlight" title="🎭 Sarcasm detected (${confidencePercent}% confidence)! This person doesn't literally mean what they're saying - they're being ironic.">${highlightedText}</span>`;
+      const sarcasmType = sarcasmData?.sarcasm_type || 'general';
+      
+      // Choose reaction emoji based on sarcasm type and confidence
+      let reactionEmoji = '🎭';
+      let reactionText = "Sarcasm detected";
+      
+      if (confidence >= 0.8) {
+        reactionEmoji = '🔥🎭';
+        reactionText = "Strong sarcasm detected";
+      } else if (confidence >= 0.6) {
+        reactionEmoji = '👀🎭';
+        reactionText = "Clear sarcasm detected";
+      } else {
+        reactionEmoji = '🤔🎭';
+        reactionText = "Possible sarcasm detected";
+      }
+      
+      // Add type-specific reactions
+      if (sarcasmType === 'economic') {
+        reactionEmoji += '💸';
+        reactionText += " (financial frustration)";
+      } else if (sarcasmType === 'work_related') {
+        reactionEmoji += '💼';
+        reactionText += " (work frustration)";
+      } else if (sarcasmType === 'frustrated') {
+        reactionEmoji += '😤';
+        reactionText += " (general frustration)";
+      }
+      
+      highlightedText = `<span class="sarcasm-highlight enhanced" title="${reactionEmoji} ${reactionText} (${confidencePercent}% confidence)! This person doesn't literally mean what they're saying - they're being ironic and expressing frustration.">${highlightedText}</span>`;
+    }
+
+    // Enhanced formality detection with reactions
+    const formalityData = message.analysis.formality_analysis;
+    if (formalityData && formalityData.formality_level) {
+      const level = formalityData.formality_level;
+      const confidence = Math.round((formalityData.confidence || 0) * 100);
+      
+      let formalityEmoji = '📝';
+      let formalityReaction = '';
+      
+      switch(level) {
+        case 'formal':
+          formalityEmoji = '🎓';
+          formalityReaction = 'Very formal language detected! Academic/professional style.';
+          break;
+        case 'professional':
+          formalityEmoji = '💼';
+          formalityReaction = 'Professional language detected! Business communication style.';
+          break;
+        case 'informal':
+          formalityEmoji = '💬';
+          formalityReaction = 'Conversational language detected! Friendly, everyday style.';
+          break;
+        case 'casual':
+          formalityEmoji = '😎';
+          formalityReaction = 'Very casual language detected! Relaxed, slang-filled style.';
+          break;
+        default:
+          formalityEmoji = '⚖️';
+          formalityReaction = 'Neutral tone detected! Balanced formality level.';
+      }
+      
+      // Add subtle formality indicator without overwhelming the text
+      highlightedText = `<span class="formality-indicator" data-formality="${level}" title="${formalityEmoji} ${formalityReaction} (${confidence}% confidence)">${highlightedText}</span>`;
     }
 
     return <span dangerouslySetInnerHTML={{ __html: highlightedText }} />;
@@ -274,18 +341,73 @@ export default function ChatPage() {
                     </div>
                   )}
                   
-                  {(message.analysis.tone?.toLowerCase().includes('sarcastic') || message.analysis.sarcasm_analysis?.sarcasm_detected) && (
-                    <div className="sarcasm-warning">
-                      <span className="sarcasm-alert">
-                        🎭 Sarcasm detected
-                        {message.analysis.sarcasm_analysis?.confidence && 
-                          ` (${Math.round(message.analysis.sarcasm_analysis.confidence * 100)}%)`
+                  {/* Enhanced Sarcasm Detection */}
+                  {(message.analysis.tone?.toLowerCase().includes('sarcastic') || 
+                    message.analysis.sarcasm_analysis?.sarcasm_detected ||
+                    message.analysis.comprehensive_sarcasm_analysis?.sarcasm_detected) && (
+                    <div className="sarcasm-warning enhanced">
+                      <div className="sarcasm-header">
+                        <span className="sarcasm-alert">
+                          {(() => {
+                            const sarcasmData = message.analysis.comprehensive_sarcasm_analysis || message.analysis.sarcasm_analysis;
+                            const confidence = sarcasmData?.confidence || 0.5;
+                            const sarcasmType = sarcasmData?.sarcasm_type;
+                            
+                            if (confidence >= 0.8) {
+                              return '🔥🎭 Strong sarcasm detected';
+                            } else if (confidence >= 0.6) {
+                              return '👀🎭 Clear sarcasm detected';
+                            } else {
+                              return '🤔🎭 Possible sarcasm detected';
+                            }
+                          })()}
+                          {message.analysis.sarcasm_analysis?.confidence && 
+                            ` (${Math.round(message.analysis.sarcasm_analysis.confidence * 100)}%)`
+                          }
+                        </span>
+                      </div>
+                      
+                      {/* Sarcasm Type Reaction */}
+                      {(() => {
+                        const sarcasmData = message.analysis.comprehensive_sarcasm_analysis || message.analysis.sarcasm_analysis;
+                        const sarcasmType = sarcasmData?.sarcasm_type;
+                        
+                        if (sarcasmType === 'economic') {
+                          return (
+                            <div className="sarcasm-type-reaction">
+                              💸 <strong>Financial frustration detected!</strong> They're expressing money troubles sarcastically.
+                            </div>
+                          );
+                        } else if (sarcasmType === 'work_related') {
+                          return (
+                            <div className="sarcasm-type-reaction">
+                              💼 <strong>Work frustration detected!</strong> They're expressing job dissatisfaction ironically.
+                            </div>
+                          );
+                        } else if (sarcasmType === 'frustrated') {
+                          return (
+                            <div className="sarcasm-type-reaction">
+                              😤 <strong>General frustration detected!</strong> They're annoyed and expressing it sarcastically.
+                            </div>
+                          );
+                        } else if (sarcasmType === 'contradiction') {
+                          return (
+                            <div className="sarcasm-type-reaction">
+                              🔄 <strong>Contradictory language detected!</strong> They're saying the opposite of what they mean.
+                            </div>
+                          );
                         }
-                      </span>
+                        return null;
+                      })()}
+                      
+                      {/* Quick explanation */}
+                      <div className="sarcasm-explanation">
+                        💡 <strong>Translation:</strong> They mean the opposite of what they're saying - they're actually frustrated or upset!
+                      </div>
                     </div>
                   )}
 
-                  {/* Formality Analysis for Chat Messages */}
+                  {/* Enhanced Formality Analysis for Chat Messages */}
                   <div style={{ marginTop: 12 }}>
                     <FormalityAnalysis 
                       text={message.text}
@@ -297,6 +419,36 @@ export default function ChatPage() {
                       showTitle={false}
                     />
                   </div>
+                  
+                  {/* Quick Formality Reaction */}
+                  {message.analysis.formality_analysis && (
+                    <div className="formality-reaction" style={{
+                      marginTop: 8,
+                      padding: 8,
+                      backgroundColor: '#f8f9fa',
+                      borderRadius: 6,
+                      fontSize: 12,
+                      color: '#6c757d'
+                    }}>
+                      {(() => {
+                        const level = message.analysis.formality_analysis.formality_level;
+                        const confidence = Math.round((message.analysis.formality_analysis.confidence || 0) * 100);
+                        
+                        switch(level) {
+                          case 'formal':
+                            return `🎓 <strong>Formal style detected!</strong> (${confidence}%) - Perfect for academic or official contexts!`;
+                          case 'professional':
+                            return `💼 <strong>Professional style detected!</strong> (${confidence}%) - Great for business communication!`;
+                          case 'informal':
+                            return `💬 <strong>Conversational style detected!</strong> (${confidence}%) - Perfect for friendly chats!`;
+                          case 'casual':
+                            return `😎 <strong>Casual style detected!</strong> (${confidence}%) - Awesome for texting with friends!`;
+                          default:
+                            return `⚖️ <strong>Neutral style detected!</strong> (${confidence}%) - Balanced tone that works everywhere!`;
+                        }
+                      })()}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -374,7 +526,7 @@ export default function ChatPage() {
             color: '#6c757d',
             fontStyle: 'italic'
           }}>
-            ⚠️ This response was generated using AI. Please use responsibly.
+            Please be aware that all these responses have been generated with AI.
           </p>
         </div>
       </div>

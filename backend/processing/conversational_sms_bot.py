@@ -196,23 +196,26 @@ class ConversationalSMSBot:
         contextual_response = self._generate_contextual_response(user_message, user_analysis)
         response_parts.append(contextual_response)
         
-        # 2. Address any slang they used (if applicable)
+        # 2. Continue the conversation naturally while teaching new slang (but not always)
+        if len(self.conversation_history) % 3 == 0:  # Only every 3rd message gets follow-up
+            follow_up = self._generate_natural_follow_up(user_message, user_analysis)
+            if follow_up:
+                response_parts.append(follow_up)
+        
+        # 3. Address any slang they used (if applicable)
         if user_analysis['contains_slang']:
-            response_parts.append("btw I see you using some slang! 👀")
+            response_parts.append("\\nbtw I see you using some slang! 👀")
             for slang_item in user_analysis['contains_slang'][:2]:  # Limit to 2
                 response_parts.append(f"💬 \"{slang_item['term']}\" = {slang_item['meaning']}")
         
-        # 3. Continue the conversation naturally while teaching new slang
-        follow_up = self._generate_natural_follow_up(user_message, user_analysis)
-        if follow_up:
-            response_parts.append(follow_up)
-        
-        # 4. Add slang explanations only if new slang was used
-        new_slang_used = self._extract_slang_from_response(" ".join(response_parts))
-        if new_slang_used:
-            response_parts.append("\\n📚 **Slang breakdown:**")
-            for term, meaning in new_slang_used.items():
-                response_parts.append(f"• \"{term}\" = {meaning}")
+        # 4. Add slang explanations only if new slang was used and it's a longer conversation
+        final_response = " ".join(response_parts)
+        if len(self.conversation_history) > 2:  # Only explain after a few exchanges
+            new_slang_used = self._extract_slang_from_response(final_response)
+            if new_slang_used and len(new_slang_used) <= 2:  # Only if few terms to avoid overwhelm
+                response_parts.append("\\n📚 **Quick slang check:**")
+                for term, meaning in list(new_slang_used.items())[:2]:  # Max 2 explanations
+                    response_parts.append(f"• \"{term}\" = {meaning}")
         
         return " ".join(response_parts)
     
@@ -235,23 +238,37 @@ class ConversationalSMSBot:
         
         # Question responses - actually try to engage with their question
         if analysis['message_type'] == 'question':
-            if any(word in message_lower for word in ['how are you', 'how you doing', 'what up']):
+            if any(word in message_lower for word in ['how are you', 'how you doing', 'what up', 'how you been']):
                 return random.choice([
                     "I'm living my best life! just vibing and helping people learn slang! how about you bestie?",
                     "oh you know, just existing and serving knowledge! 💅 what's good with you?",
-                    "honestly thriving! thanks for asking! what's on your mind today?"
+                    "honestly thriving! thanks for asking! what's on your mind today?",
+                    "doing great bestie! just here spreading the slang wisdom ✨ how's your day going?"
+                ])
+            elif any(word in message_lower for word in ['what does', 'what means', 'mean by', 'explain']):
+                return random.choice([
+                    "ooh good question! let me break that down for you bestie!",
+                    "say less! I love explaining slang! that's literally what I'm here for!",
+                    "bestie you came to the right place! let me spill the tea on that! ☕"
                 ])
             elif main_topic == 'weather':
                 return random.choice([
-                    "no cap it's been a pretty good day! the weather's giving main character vibes fr!",
-                    "today's been chef's kiss so far! ✨ how's your day treating you?",
-                    "honestly the vibes have been immaculate today! what about you?"
+                    "honestly the weather's been giving main character vibes lately! ☀️",
+                    "no cap today's been a pretty good day weather-wise!",
+                    "the vibes outside have been immaculate! mother nature understood the assignment!"
+                ])
+            elif any(word in message_lower for word in ['what should', 'what can', 'ideas', 'suggestions']):
+                return random.choice([
+                    "OMG I have so many ideas! let me think of something that slaps!",
+                    "bestie I got you! my brain is literally buzzing with suggestions!",
+                    "okay wait this is exciting! I love giving recommendations! ✨"
                 ])
             else:
                 return random.choice([
-                    "ooh good question! let me think about that...",
-                    "that's actually such a vibe! I love when people ask about that!",
-                    "okay wait that's actually so interesting to think about!"
+                    "ooh that's actually such a good question!",
+                    "bestie you got me thinking! I love when people ask about that!",
+                    "okay wait that's actually so interesting! let me think about that...",
+                    "no cap that's a vibe! I'm here for these kinds of questions!"
                 ])
         
         # Help request responses
