@@ -358,6 +358,25 @@ export default function ChatPage() {
             <span>Modern expressions & emojis</span>
           </div>
         </div>
+
+        {/* AI Disclaimer */}
+        <div style={{
+          marginTop: '20px',
+          padding: '12px',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '8px',
+          border: '1px solid #dee2e6',
+          textAlign: 'center'
+        }}>
+          <p style={{
+            margin: 0,
+            fontSize: '13px',
+            color: '#6c757d',
+            fontStyle: 'italic'
+          }}>
+            ⚠️ This response was generated using AI. Please use responsibly.
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -480,6 +480,25 @@ export default function AnalysisPage() {
           Analyze Another File
         </button>
       </div>
+
+      {/* AI Disclaimer */}
+      <div style={{
+        marginTop: '30px',
+        padding: '15px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '8px',
+        border: '1px solid #dee2e6',
+        textAlign: 'center'
+      }}>
+        <p style={{
+          margin: 0,
+          fontSize: '14px',
+          color: '#6c757d',
+          fontStyle: 'italic'
+        }}>
+          ⚠️ This response was generated using AI. Please use responsibly.
+        </p>
+      </div>
     </div>
   );
 }
