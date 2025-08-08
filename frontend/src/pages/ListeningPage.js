@@ -12,6 +12,8 @@ export default function ListeningPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("upload"); // "upload", "record", or "text"
+  const [previewAnalysis, setPreviewAnalysis] = useState(null); // New state for real-time analysis
+  const [previewLoading, setPreviewLoading] = useState(false);
   const navigate = useNavigate();
 
   // Handle recorded audio from VoiceRecorder component
@@ -19,6 +21,51 @@ export default function ListeningPage() {
     setRecordedBlob(blob);
     setFile(null); // Clear any uploaded file
     setError("");
+  };
+
+  // Real-time text analysis for preview
+  const analyzeTextPreview = async (text) => {
+    if (!text.trim() || text.length < 3) {
+      setPreviewAnalysis(null);
+      return;
+    }
+
+    setPreviewLoading(true);
+    try {
+      // Call comprehensive slang analysis
+      const slangResponse = await axios.post("http://localhost:5002/analyze-comprehensive-slang", {
+        text: text
+      });
+
+      // Call formality analysis
+      const formalityResponse = await axios.post("http://localhost:5002/analyze-formality", {
+        text: text
+      });
+
+      setPreviewAnalysis({
+        slang: slangResponse.data,
+        formality: formalityResponse.data,
+        highlightedText: highlightSlangWords(text, slangResponse.data)
+      });
+    } catch (error) {
+      console.error("Preview analysis error:", error);
+      setPreviewAnalysis(null);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  // Function to highlight slang words in text
+  const highlightSlangWords = (text, slangData) => {
+    if (!slangData || !slangData.found_terms) return text;
+    
+    let highlightedText = text;
+    Object.keys(slangData.found_terms).forEach(word => {
+      const regex = new RegExp(`\\b${word}\\b`, 'gi');
+      highlightedText = highlightedText.replace(regex, `<span style="background-color: #FFE066; padding: 2px 4px; border-radius: 4px; font-weight: bold;">${word}</span>`);
+    });
+    
+    return highlightedText;
   };
 
   // Main decipher function that handles both uploaded files and recorded audio

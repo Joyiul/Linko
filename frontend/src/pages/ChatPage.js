@@ -206,6 +206,11 @@ export default function ChatPage() {
       const confidencePercent = Math.round(confidence * 100);
       const sarcasmType = sarcasmData?.sarcasm_type || 'general';
       
+      // Use highlighted text from backend if available
+      if (sarcasmData?.highlighted_text) {
+        highlightedText = sarcasmData.highlighted_text;
+      }
+      
       // Choose reaction emoji based on sarcasm type and confidence
       let reactionEmoji = '🎭';
       let reactionText = "Sarcasm detected";
@@ -231,9 +236,19 @@ export default function ChatPage() {
       } else if (sarcasmType === 'frustrated') {
         reactionEmoji += '😤';
         reactionText += " (general frustration)";
+      } else if (sarcasmType === 'exclamation') {
+        reactionEmoji += '❗';
+        reactionText += " (exclamation emphasis)";
+      } else if (sarcasmType === 'temporal') {
+        reactionEmoji += '⏰';
+        reactionText += " (timing-based)";
+      } else if (sarcasmType === 'repetitive') {
+        reactionEmoji += '🔄';
+        reactionText += " (repetitive pattern)";
       }
       
-      highlightedText = `<span class="sarcasm-highlight enhanced" title="${reactionEmoji} ${reactionText} (${confidencePercent}% confidence)! This person doesn't literally mean what they're saying - they're being ironic and expressing frustration.">${highlightedText}</span>`;
+      // Add wrapper for context without overriding backend highlighting
+      highlightedText = `<span class="sarcasm-context" title="${reactionEmoji} ${reactionText} (${confidencePercent}% confidence)! This person doesn't literally mean what they're saying - they're being ironic and expressing frustration.">${highlightedText}</span>`;
     }
 
     // Enhanced formality detection with reactions
@@ -446,6 +461,35 @@ export default function ChatPage() {
                           default:
                             return `⚖️ <strong>Neutral style detected!</strong> (${confidence}%) - Balanced tone that works everywhere!`;
                         }
+                      })()}
+                    </div>
+                  )}
+                  
+                  {/* Emoji Analysis */}
+                  {message.analysis.emoji_analysis && 
+                   message.analysis.emoji_analysis.tone !== 'neutral' && 
+                   message.analysis.emoji_analysis.confidence > 0.4 && (
+                    <div style={{
+                      marginTop: '8px',
+                      padding: '8px 12px',
+                      backgroundColor: '#e8f4fd',
+                      borderRadius: '8px',
+                      border: '1px solid #bee5eb',
+                      fontSize: 12,
+                      color: '#495057'
+                    }}>
+                      {(() => {
+                        const emojiTone = message.analysis.emoji_analysis.tone;
+                        const confidence = Math.round((message.analysis.emoji_analysis.confidence || 0) * 100);
+                        
+                        const emojiIcon = emojiTone === 'joy' ? '😊' :
+                                         emojiTone === 'sadness' ? '😢' :
+                                         emojiTone === 'anger' ? '😠' :
+                                         emojiTone === 'fear' ? '😨' :
+                                         emojiTone === 'surprise' ? '😯' :
+                                         emojiTone === 'disgust' ? '🤢' : '😐';
+                        
+                        return `${emojiIcon} <strong>Emoji tone: ${emojiTone}</strong> (${confidence}%) - ${message.analysis.emoji_analysis.details || 'Detected from emojis in message'}`;
                       })()}
                     </div>
                   )}

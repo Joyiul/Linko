@@ -71,23 +71,56 @@ def upload_and_analyze():
         
         transcript = transcription_result['transcript']
         
-        # Analyze using both old and new systems
-        tone_result = analyze_audio(transcript)
-        slang_result = detect_slang(transcript)
-        
-        # NEW: Use robust emotion analysis
-        robust_analysis = analyze_emotion_robust(text=transcript, audio_path=filepath)
-        
-        return jsonify({
-            'filename': filename,
-            'transcript': transcript,
-            'analysis': {
-                'tone': tone_result,  # Legacy
-                'slang': slang_result,
-                'robust_emotion': robust_analysis  # NEW - More accurate
-            },
-            'recommendation': 'Use robust_emotion analysis for best accuracy'
-        })
+        # Perform comprehensive analysis (same as /analyze endpoint)
+        import requests
+        try:
+            # Call the comprehensive analyze endpoint internally
+            analysis_response = requests.post('http://localhost:5002/analyze', 
+                                            json={'transcript': transcript},
+                                            timeout=30)
+            
+            if analysis_response.status_code == 200:
+                comprehensive_analysis = analysis_response.json()
+                
+                return jsonify({
+                    'filename': filename,
+                    'transcript': transcript,
+                    'analysis': comprehensive_analysis  # Complete analysis with tone, emotion, formality, etc.
+                })
+            else:
+                # Fallback to basic analysis if comprehensive fails
+                tone_result = analyze_audio(transcript)
+                slang_result = detect_slang(transcript)
+                robust_analysis = analyze_emotion_robust(text=transcript, audio_path=filepath)
+                
+                return jsonify({
+                    'filename': filename,
+                    'transcript': transcript,
+                    'analysis': {
+                        'tone': tone_result,
+                        'slang': slang_result,
+                        'robust_emotion': robust_analysis
+                    },
+                    'recommendation': 'Basic analysis used - comprehensive analysis failed'
+                })
+                
+        except Exception as analysis_error:
+            print(f"Comprehensive analysis failed: {analysis_error}")
+            # Fallback to basic analysis
+            tone_result = analyze_audio(transcript)
+            slang_result = detect_slang(transcript)
+            robust_analysis = analyze_emotion_robust(text=transcript, audio_path=filepath)
+            
+            return jsonify({
+                'filename': filename,
+                'transcript': transcript,
+                'analysis': {
+                    'tone': tone_result,
+                    'slang': slang_result,
+                    'robust_emotion': robust_analysis
+                },
+                'recommendation': 'Basic analysis used due to error'
+            })
         
     except Exception as e:
         import traceback

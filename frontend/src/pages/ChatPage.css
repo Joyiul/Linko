@@ -187,6 +187,30 @@
   transition: all 0.3s ease;
 }
 
+/* Red highlighting for individual sarcastic words from backend */
+.message-content span[style*="color: #DC3545"] {
+  color: #DC3545 !important;
+  font-weight: bold !important;
+  background-color: rgba(220, 53, 69, 0.1) !important;
+  padding: 2px 4px !important;
+  border-radius: 3px !important;
+  text-decoration: underline !important;
+  text-decoration-style: wavy !important;
+  text-decoration-color: #DC3545 !important;
+  animation: redSarcasmPulse 2s ease-in-out infinite alternate;
+}
+
+/* Sarcasm context wrapper */
+.sarcasm-context {
+  position: relative;
+  cursor: help;
+}
+
+.sarcasm-context:hover {
+  transform: scale(1.02);
+  transition: transform 0.2s ease;
+}
+
 .sarcasm-highlight.enhanced {
   background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 50%, #f8bbd9 100%);
   border: 2px solid #e91e63;
@@ -271,6 +295,22 @@
   100% { 
     box-shadow: 0 1px 3px rgba(211, 47, 47, 0.2); 
     border-color: #e91e63;
+  }
+}
+
+@keyframes redSarcasmPulse {
+  0% { 
+    background-color: rgba(220, 53, 69, 0.1);
+    text-decoration-color: #DC3545;
+  }
+  50% { 
+    background-color: rgba(220, 53, 69, 0.2);
+    text-decoration-color: #B71C1C;
+    transform: scale(1.02);
+  }
+  100% { 
+    background-color: rgba(220, 53, 69, 0.1);
+    text-decoration-color: #DC3545;
   }
 }
 

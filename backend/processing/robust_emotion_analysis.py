@@ -104,6 +104,113 @@ class RobustEmotionAnalyzer:
         
         # Try to load models
         self._load_models()
+        
+        # Load emoji mappings
+        self._load_emoji_mappings()
+    
+    def _load_emoji_mappings(self):
+        """Load emoji mappings from CSV dataset"""
+        self.emoji_mappings = {}
+        try:
+            csv_path = os.path.join(os.path.dirname(__file__), '..', 'Datasets', 'genz_emojis.csv')
+            if os.path.exists(csv_path):
+                import pandas as pd
+                df = pd.read_csv(csv_path)
+                for _, row in df.iterrows():
+                    emoji = row.get('emoji', '')
+                    meaning = row.get('meaning', '').lower()
+                    if emoji and meaning:
+                        # Map emoji to emotional context
+                        emotion_context = self._map_meaning_to_emotion(meaning)
+                        self.emoji_mappings[emoji] = {
+                            'meaning': meaning,
+                            'emotion': emotion_context
+                        }
+        except Exception as e:
+            print(f"Warning: Could not load emoji mappings: {e}")
+            self.emoji_mappings = {}
+    
+    def _map_meaning_to_emotion(self, meaning):
+        """Map emoji meaning to emotion category"""
+        meaning_lower = meaning.lower()
+        
+        # Map meanings to primary emotions
+        if any(word in meaning_lower for word in ['happy', 'joy', 'laugh', 'fun', 'love', 'excited']):
+            return 'joy'
+        elif any(word in meaning_lower for word in ['sad', 'cry', 'tears', 'depressed', 'down']):
+            return 'sadness'
+        elif any(word in meaning_lower for word in ['angry', 'mad', 'rage', 'annoyed', 'furious']):
+            return 'anger'
+        elif any(word in meaning_lower for word in ['scared', 'fear', 'afraid', 'worried', 'nervous']):
+            return 'fear'
+        elif any(word in meaning_lower for word in ['surprised', 'shock', 'wow', 'amazing']):
+            return 'surprise'
+        elif any(word in meaning_lower for word in ['disgust', 'gross', 'yuck', 'eww']):
+            return 'disgust'
+        elif any(word in meaning_lower for word in ['neutral', 'okay', 'fine', 'normal']):
+            return 'neutral'
+        else:
+            return 'neutral'
+    
+    def detect_emojis_in_text(self, text):
+        """Detect emojis in text and return their analysis"""
+        import re
+        
+        # Enhanced emoji pattern to catch more emojis
+        emoji_pattern = re.compile(
+            "["
+            "\U0001F600-\U0001F64F"  # emoticons
+            "\U0001F300-\U0001F5FF"  # symbols & pictographs
+            "\U0001F680-\U0001F6FF"  # transport & map symbols
+            "\U0001F1E0-\U0001F1FF"  # flags (iOS)
+            "\U00002702-\U000027B0"
+            "\U000024C2-\U0001F251"
+            "\U0001F900-\U0001F9FF"  # supplemental symbols
+            "]+", flags=re.UNICODE
+        )
+        
+        found_emojis = emoji_pattern.findall(text)
+        emoji_analysis = []
+        
+        for emoji in found_emojis:
+            if emoji in self.emoji_mappings:
+                emoji_data = self.emoji_mappings[emoji]
+                emoji_analysis.append({
+                    'emoji': emoji,
+                    'meaning': emoji_data['meaning'],
+                    'emotion': emoji_data['emotion']
+                })
+        
+        return emoji_analysis
+    
+    def analyze_emoji_tone(self, emoji_analysis):
+        """Analyze overall tone based on detected emojis"""
+        if not emoji_analysis:
+            return {'tone': 'neutral', 'confidence': 0.0, 'details': 'No emojis detected'}
+        
+        # Count emotion categories
+        emotion_counts = {}
+        for emoji_data in emoji_analysis:
+            emotion = emoji_data['emotion']
+            emotion_counts[emotion] = emotion_counts.get(emotion, 0) + 1
+        
+        # Determine dominant emotion
+        if emotion_counts:
+            dominant_emotion = max(emotion_counts, key=emotion_counts.get)
+            confidence = emotion_counts[dominant_emotion] / len(emoji_analysis)
+            
+            # Create detailed response
+            emoji_list = [f"{data['emoji']} ({data['meaning']})" for data in emoji_analysis]
+            details = f"Detected {len(emoji_analysis)} emojis: {', '.join(emoji_list)}"
+            
+            return {
+                'tone': dominant_emotion,
+                'confidence': confidence,
+                'details': details,
+                'emoji_breakdown': emotion_counts
+            }
+        
+        return {'tone': 'neutral', 'confidence': 0.0, 'details': 'No meaningful emojis found'}
     
     def _load_models(self):
         """Load audio emotion models with robust error handling"""
@@ -172,86 +279,111 @@ class RobustEmotionAnalyzer:
         # VADER sentiment analysis for baseline
         vader_scores = self.text_analyzer.polarity_scores(text)
         
-        # Enhanced pattern-based emotion scoring
+        # Enhanced pattern-based emotion scoring with higher accuracy
         emotion_scores = {}
         for emotion, patterns in self.emotion_patterns.items():
             score = 0
             
-            # Direct keyword matching with higher sensitivity
+            # Direct keyword matching with context awareness
             for keyword in patterns['keywords']:
                 if keyword in text_lower:
-                    score += 3  # Increased base score
+                    # Check if keyword is standalone word (not part of another word)
+                    import re
+                    if re.search(r'\b' + re.escape(keyword) + r'\b', text_lower):
+                        score += 5  # Higher score for exact word matches
+                    else:
+                        score += 2  # Lower score for partial matches
             
             # Phrase matching (weighted much higher for complete expressions)
             for phrase in patterns['phrases']:
                 if phrase in text_lower:
-                    score += 8  # Much higher score for complete phrases
+                    score += 12  # Much higher score for complete phrases
             
-            # Personal statements ("I'm happy", "I feel", etc.)
+            # Enhanced personal statements with more variations
             personal_indicators = [
-                f"i'm {keyword}" for keyword in patterns['keywords'][:8]  # Top keywords
+                f"i'm {keyword}" for keyword in patterns['keywords'][:8]
             ] + [
-                f"i feel {keyword}" for keyword in patterns['keywords'][:5]
+                f"i am {keyword}" for keyword in patterns['keywords'][:8]
             ] + [
-                f"feeling {keyword}" for keyword in patterns['keywords'][:5]
+                f"feeling {keyword}" for keyword in patterns['keywords'][:8]
+            ] + [
+                f"i feel {keyword}" for keyword in patterns['keywords'][:8]
+            ] + [
+                f"i'm so {keyword}" for keyword in patterns['keywords'][:5]
+            ] + [
+                f"really {keyword}" for keyword in patterns['keywords'][:5]
+            ] + [
+                f"very {keyword}" for keyword in patterns['keywords'][:5]
             ]
             
             for personal in personal_indicators:
                 if personal in text_lower:
-                    score += 10  # Very high score for personal emotional statements
+                    score += 15  # Very high score for personal emotional statements
             
-            # Intensity modifiers - check for proximity to keywords
+            # Enhanced intensity modifiers with proximity checking
             for keyword in patterns['keywords']:
                 if keyword in text_lower:
                     for intensity in patterns['intensity_words']:
-                        # Check various intensity patterns
                         intensity_patterns = [
                             f"{intensity} {keyword}",
                             f"i'm {intensity} {keyword}",
                             f"feel {intensity} {keyword}",
-                            f"{keyword} {intensity}"  # Sometimes comes after
+                            f"{keyword} {intensity}",
+                            f"so {intensity} {keyword}",
+                            f"really {intensity} {keyword}"
                         ]
                         for pattern in intensity_patterns:
                             if pattern in text_lower:
-                                score += 5  # Bonus for intensity
+                                score += 8  # Higher bonus for intensity
             
-            # Special handling for exclamation marks and caps (emotional indicators)
+            # Enhanced exclamation and caps detection
             if '!' in text and emotion != 'neutral':
                 excitement_keywords = [kw for kw in patterns['keywords'] if kw in text_lower]
                 if excitement_keywords:
-                    score += len([c for c in text if c == '!']) * 2  # Bonus per exclamation
+                    exclamation_count = text.count('!')
+                    score += exclamation_count * 3  # Higher bonus per exclamation
+            
+            # Caps detection for emotional intensity
+            caps_words = [word for word in text.split() if word.isupper() and len(word) > 2]
+            if caps_words and emotion != 'neutral':
+                for keyword in patterns['keywords']:
+                    if any(keyword.upper() in caps_word for caps_word in caps_words):
+                        score += 6  # Bonus for caps emotional words
+            
+            # Emoji boost from emoji analysis
+            if hasattr(self, 'emoji_mappings'):
+                emoji_analysis = self.detect_emojis_in_text(text)
+                emoji_tone = self.analyze_emoji_tone(emoji_analysis)
+                if emoji_tone['tone'] == emotion and emoji_tone['confidence'] > 0.5:
+                    score += 10  # Strong emoji reinforcement
             
             emotion_scores[emotion] = score
         
-        # Determine primary emotion with improved logic
+        # Enhanced VADER integration
+        if vader_scores['compound'] > 0.6:
+            emotion_scores['joy'] = emotion_scores.get('joy', 0) + 8
+        elif vader_scores['compound'] < -0.6:
+            emotion_scores['sadness'] = emotion_scores.get('sadness', 0) + 8
+        elif abs(vader_scores['compound']) < 0.1:
+            emotion_scores['neutral'] = emotion_scores.get('neutral', 0) + 3
+        
+        # Determine primary emotion with improved confidence calculation
         max_score = max(emotion_scores.values()) if emotion_scores else 0
         
         if max_score > 0:
             primary_emotion = max(emotion_scores, key=emotion_scores.get)
-            # Calculate confidence based on score strength
-            confidence = min(max_score * 0.08, 0.95)  # Adjusted scaling
-            
-            # Ensure minimum confidence for clear emotional expressions
-            if max_score >= 8:  # Strong emotional indicators
-                confidence = max(confidence, 0.7)
-            elif max_score >= 3:  # Moderate indicators
-                confidence = max(confidence, 0.5)
-            
-        else:
-            # Enhanced VADER fallback for edge cases
-            compound = vader_scores.get('compound', 0)
-            if compound >= 0.5:
-                primary_emotion = 'happy'
-                confidence = min(compound * 0.8, 0.75)
-            elif compound <= -0.5:
-                primary_emotion = 'sad'
-                confidence = min(abs(compound) * 0.8, 0.75)
-            elif vader_scores.get('neu', 0) > 0.8:
-                primary_emotion = 'neutral'
-                confidence = 0.6
+            # Improved confidence calculation
+            if max_score >= 15:
+                confidence = min(0.85 + (max_score - 15) * 0.01, 0.98)
+            elif max_score >= 8:
+                confidence = 0.65 + (max_score - 8) * 0.02
+            elif max_score >= 3:
+                confidence = 0.45 + (max_score - 3) * 0.04
             else:
-                primary_emotion = 'neutral'
-                confidence = 0.4
+                confidence = 0.25 + max_score * 0.06
+        else:
+            primary_emotion = 'neutral'
+            confidence = 0.4
         
         return {
             'emotion': primary_emotion,
@@ -398,6 +530,11 @@ def analyze_emotion_robust(text=None, audio_path=None):
     if text:
         text_result = robust_analyzer.analyze_text_robust(text)
         results['text_analysis'] = text_result
+        
+        # Add emoji analysis for text
+        emoji_analysis = robust_analyzer.detect_emojis_in_text(text)
+        emoji_tone = robust_analyzer.analyze_emoji_tone(emoji_analysis)
+        results['emoji_analysis'] = emoji_tone
     
     # Analyze audio if provided
     if audio_path:
@@ -406,29 +543,68 @@ def analyze_emotion_robust(text=None, audio_path=None):
     
     # Determine overall emotion
     if text and audio_path:
-        # Combine both analyses
+        # Combine text, audio, and emoji analyses
         text_emotion = results['text_analysis']['emotion']
         audio_emotion = results['audio_analysis']['emotion']
+        emoji_emotion = results['emoji_analysis']['tone']
+        emoji_confidence = results['emoji_analysis']['confidence']
         
-        if text_emotion == audio_emotion:
-            # Agreement between modalities
-            primary_emotion = text_emotion
-            confidence = min((results['text_analysis']['confidence'] + results['audio_analysis']['confidence']) / 2 * 1.2, 0.95)
+        # If emojis detected with high confidence, factor them in
+        if emoji_confidence > 0.6:
+            # Strong emoji indicators - weight them heavily
+            if emoji_emotion == text_emotion or emoji_emotion == audio_emotion:
+                # Emoji agrees with one modality
+                primary_emotion = emoji_emotion
+                confidence = min((results['text_analysis']['confidence'] + results['audio_analysis']['confidence'] + emoji_confidence) / 3 * 1.3, 0.95)
+            else:
+                # Emoji disagrees - still consider it but lower weight
+                primary_emotion = text_emotion  # Prefer text as baseline
+                confidence = results['text_analysis']['confidence'] * 0.9
         else:
-            # Disagreement - prefer text analysis for now
-            primary_emotion = text_emotion
-            confidence = results['text_analysis']['confidence'] * 0.8
+            # Low emoji confidence - standard text/audio analysis
+            if text_emotion == audio_emotion:
+                primary_emotion = text_emotion
+                confidence = min((results['text_analysis']['confidence'] + results['audio_analysis']['confidence']) / 2 * 1.2, 0.95)
+            else:
+                primary_emotion = text_emotion
+                confidence = results['text_analysis']['confidence'] * 0.8
         
         results['multimodal_analysis'] = {
             'primary_emotion': primary_emotion,
             'confidence': confidence,
-            'agreement': text_emotion == audio_emotion
+            'agreement': {
+                'text_audio': text_emotion == audio_emotion,
+                'text_emoji': text_emotion == emoji_emotion,
+                'audio_emoji': audio_emotion == emoji_emotion
+            },
+            'emoji_influence': emoji_confidence > 0.6
         }
     elif text:
+        # Text-only analysis with emoji enhancement
+        text_emotion = results['text_analysis']['emotion']
+        emoji_emotion = results['emoji_analysis']['tone']
+        emoji_confidence = results['emoji_analysis']['confidence']
+        
+        if emoji_confidence > 0.7:
+            # Strong emoji indicators
+            if emoji_emotion == text_emotion:
+                # Emoji reinforces text analysis
+                primary_emotion = text_emotion
+                confidence = min(results['text_analysis']['confidence'] * 1.2, 0.95)
+            else:
+                # Emoji contradicts text - prefer emoji for tone
+                primary_emotion = emoji_emotion
+                confidence = max(emoji_confidence, results['text_analysis']['confidence'] * 0.8)
+        else:
+            # Weak or no emoji signal
+            primary_emotion = text_emotion
+            confidence = results['text_analysis']['confidence']
+        
         results['multimodal_analysis'] = {
-            'primary_emotion': results['text_analysis']['emotion'],
-            'confidence': results['text_analysis']['confidence'],
-            'modality': 'text_only'
+            'primary_emotion': primary_emotion,
+            'confidence': confidence,
+            'modality': 'text_with_emoji',
+            'emoji_influence': emoji_confidence > 0.7
         }
     elif audio_path:
         results['multimodal_analysis'] = {

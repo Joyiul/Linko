@@ -4,6 +4,7 @@ import HighlightedText from '../components/HighlightedText';
 import TextSimplificationBox from '../components/TextSimplificationBox';
 import EmotionImage from '../components/EmotionImage';
 import FormalityAnalysis from '../components/FormalityAnalysis';
+import NeutralEmoji from '../components/NeutralEmoji';
 import './AnalysisPage.css';
 
 export default function AnalysisPage() {
@@ -25,6 +26,22 @@ export default function AnalysisPage() {
       localStorage.removeItem("analysisResults");
     }
   }, []);
+
+  const getEmotionImagePath = (emotion) => {
+    const imageMap = {
+      'angry': '/emotions/angry.png',
+      'happy': '/emotions/happy.png', 
+      'sad': '/emotions/sad.png',
+      'fear': '/emotions/sad.png', // fallback
+      'disgust': '/emotions/disgust.png',
+      'surprise': '/emotions/shock.png',
+      'excited': '/emotions/excited.png',
+      'interest': '/emotions/interest.png',
+      'neutral': '/emotions/netural.png', // Note: file has typo
+      'disappointed': '/emotions/disappoint.png'
+    };
+    return imageMap[emotion] || '/emotions/netural.png'; // Default to neutral
+  };
 
   const getEmotionEmoji = (emotion) => {
     const emojiMap = {
@@ -70,12 +87,6 @@ export default function AnalysisPage() {
       {/* Enhanced Emotion Analysis Section */}
       <div style={{ marginBottom: '30px' }}>
         <h3>Emotion & Tone Analysis</h3>
-        
-        {/* Primary Tone */}
-        <div style={{ marginBottom: '20px' }}>
-          <h4>Primary Tone</h4>
-          <EmojiToneBar tone={analysis.tone || results.tone || "Neutral"} />
-        </div>
 
         {/* Detailed Emotion Analysis */}
         {emotionAnalysis.detected_emotion && (
@@ -117,7 +128,7 @@ export default function AnalysisPage() {
                   padding: '20px',
                   backgroundColor: '#f8f9fa',
                   borderRadius: '12px',
-                  border: '2px solid #28a745',
+                  border: '2px solid #6c757d',
                   marginBottom: '20px'
                 }}>
                   <div style={{ 
@@ -127,7 +138,11 @@ export default function AnalysisPage() {
                     alignItems: 'center',
                     gap: '12px'
                   }}>
-                    <EmotionImage emotion={emotionAnalysis.detected_emotion} size={80} />
+                    <img 
+                      src={getEmotionImagePath(emotionAnalysis.detected_emotion)} 
+                      alt={emotionAnalysis.detected_emotion}
+                      style={{ width: 80, height: 80 }}
+                    />
                     <div>
                       <div style={{ 
                         fontSize: '1.5rem', 
@@ -150,6 +165,148 @@ export default function AnalysisPage() {
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Primary Tone Analysis Section */}
+        {(results.tone || analysis.tone || emotionAnalysis.primary_tone) && (
+          <div style={{ 
+            backgroundColor: '#FFFFFF', 
+            padding: '20px', 
+            borderRadius: '10px',
+            border: '1px solid #dee2e6',
+            marginBottom: '20px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+          }}>
+            <h4 style={{ marginBottom: '15px', color: '#495057' }}>🎯 Primary Tone</h4>
+            
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center',
+              padding: '20px',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '12px',
+              border: '2px solid #28a745',
+              marginBottom: '15px'
+            }}>
+              <div style={{ 
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <img 
+                  src={getEmotionImagePath(emotionAnalysis.detected_emotion || 'neutral')} 
+                  alt={results.tone || analysis.tone || emotionAnalysis.primary_tone}
+                  style={{ width: 60, height: 60 }}
+                />
+                <div>
+                  <div style={{ 
+                    fontSize: '1.8rem', 
+                    fontFamily: 'Poppins, Nunito, Circular, sans-serif', 
+                    color: '#495057', 
+                    fontWeight: '700', 
+                    letterSpacing: '0.5px',
+                    marginBottom: '8px'
+                  }}>
+                    {results.tone || analysis.tone || emotionAnalysis.primary_tone}
+                  </div>
+                  <div style={{ 
+                    fontSize: '1rem',
+                    color: '#6c757d',
+                    fontFamily: 'Poppins, Nunito, Circular, sans-serif',
+                    fontWeight: '500',
+                    fontStyle: 'italic'
+                  }}>
+                    Detected Communication Tone
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Emoji Analysis Section */}
+        {analysis.emoji_analysis && analysis.emoji_analysis.confidence > 0.3 && (
+          <div style={{ 
+            backgroundColor: '#FFFFFF', 
+            padding: '20px', 
+            borderRadius: '10px',
+            border: '1px solid #dee2e6',
+            marginBottom: '20px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+          }}>
+            <h4 style={{ marginBottom: '15px', color: '#495057' }}>😊 Emoji-Based Tone Analysis</h4>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '15px' }}>
+              <div style={{ 
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#f8f9fa',
+                padding: '15px',
+                borderRadius: '50%',
+                border: '2px solid #dee2e6'
+              }}>
+                                  <img 
+                    src={getEmotionImagePath(emotion)} 
+                    alt={emotion}
+                    style={{ width: 50, height: 50, margin: '0 4px' }}
+                  />
+              </div>
+              <div>
+                <div style={{ 
+                  fontSize: '1.3rem', 
+                  fontWeight: '600', 
+                  textTransform: 'capitalize', 
+                  color: '#495057',
+                  marginBottom: '5px'
+                }}>
+                  {analysis.emoji_analysis.tone}
+                </div>
+                <div style={{ 
+                  fontSize: '1rem',
+                  color: getConfidenceColor(analysis.emoji_analysis.confidence),
+                  fontWeight: '500'
+                }}>
+                  Confidence: {(analysis.emoji_analysis.confidence * 100).toFixed(1)}%
+                </div>
+              </div>
+            </div>
+            
+            {analysis.emoji_analysis.details && (
+              <div style={{ 
+                backgroundColor: '#f8f9fa',
+                padding: '12px',
+                borderRadius: '8px',
+                fontSize: '0.95rem',
+                color: '#6c757d',
+                border: '1px solid #dee2e6'
+              }}>
+                <strong>Details:</strong> {analysis.emoji_analysis.details}
+              </div>
+            )}
+            
+            {analysis.emoji_analysis.emoji_breakdown && Object.keys(analysis.emoji_analysis.emoji_breakdown).length > 1 && (
+              <div style={{ marginTop: '12px' }}>
+                <strong style={{ fontSize: '0.9rem', color: '#6c757d' }}>Emotion Breakdown:</strong>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
+                  {Object.entries(analysis.emoji_analysis.emoji_breakdown).map(([emotion, count]) => (
+                    <span key={emotion} style={{
+                      backgroundColor: '#e9ecef',
+                      padding: '4px 8px',
+                      borderRadius: '12px',
+                      fontSize: '0.8rem',
+                      color: '#495057'
+                    }}>
+                      {emotion}: {count}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}
@@ -195,7 +352,7 @@ export default function AnalysisPage() {
                   padding: '20px',
                   backgroundColor: '#f8f9fa',
                   borderRadius: '12px',
-                  border: '2px solid #17a2b8',
+                  border: '2px solid #6c757d',
                   marginBottom: '20px'
                 }}>
                   <div style={{ 
@@ -205,7 +362,7 @@ export default function AnalysisPage() {
                     alignItems: 'center',
                     gap: '12px'
                   }}>
-                    <EmotionImage emotion={analysis.video_analysis.dominant_emotion} size={70} />
+                    <CustomEmotionDisplay emotion={analysis.video_analysis.dominant_emotion} size={70} />
                     <div>
                       <div style={{ 
                         fontSize: '1.3rem', 

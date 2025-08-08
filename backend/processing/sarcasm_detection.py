@@ -182,7 +182,7 @@ class SarcasmDetector:
 
     def detect_sarcasm(self, text):
         """
-        Main sarcasm detection function
+        Enhanced main sarcasm detection function with improved accuracy
         Returns: dict with sarcasm_detected (bool), confidence (float), reasons (list)
         """
         if not text or not text.strip():
@@ -190,7 +190,8 @@ class SarcasmDetector:
                 'sarcasm_detected': False,
                 'confidence': 0.0,
                 'reasons': [],
-                'sarcasm_type': None
+                'sarcasm_type': None,
+                'highlighted_text': text
             }
         
         text_lower = text.lower().strip()
@@ -198,28 +199,80 @@ class SarcasmDetector:
         confidence_score = 0.0
         sarcasm_type = None
         
-        # 1. Check for direct sarcastic phrases
+        # 1. Enhanced direct sarcastic phrases detection
         phrase_matches = self._check_sarcastic_phrases(text_lower)
         if phrase_matches:
-            confidence_score += 0.7
+            confidence_score += 0.8  # Increased confidence for explicit phrases
             reasons.extend([f"Sarcastic phrase detected: '{phrase}'" for phrase in phrase_matches])
             sarcasm_type = "explicit_phrase"
         
-        # 2. Check for positive-negative contradiction pattern
+        # 2. Enhanced positive-negative contradiction pattern
         contradiction_score = self._check_contradiction_pattern(text_lower)
         if contradiction_score > 0:
-            confidence_score += contradiction_score
+            confidence_score += contradiction_score * 1.2  # Boost contradiction detection
             reasons.append("Positive words used in negative context (contradiction pattern)")
             if not sarcasm_type:
                 sarcasm_type = "contradiction"
         
-        # 3. Check for economic sarcasm (work/money related)
+        # 3. Enhanced economic sarcasm (work/money related)
         economic_score = self._check_economic_sarcasm(text_lower)
         if economic_score > 0:
-            confidence_score += economic_score
+            confidence_score += economic_score * 1.1  # Slight boost for economic sarcasm
             reasons.append("Economic hardship expressed with positive language")
             if not sarcasm_type:
                 sarcasm_type = "economic"
+        
+        # 4. Enhanced exclamation mark sarcasm
+        exclamation_score = self._check_exclamation_sarcasm(text)
+        if exclamation_score > 0:
+            confidence_score += exclamation_score * 1.3  # Higher boost for exclamation sarcasm
+            reasons.append("Positive words with exclamation marks in negative context")
+            if not sarcasm_type:
+                sarcasm_type = "exclamation"
+        
+        # 5. NEW: Check for repetitive sarcasm patterns
+        repetitive_score = self._check_repetitive_sarcasm(text_lower)
+        if repetitive_score > 0:
+            confidence_score += repetitive_score
+            reasons.append("Repetitive positive language suggesting sarcasm")
+            if not sarcasm_type:
+                sarcasm_type = "repetitive"
+        
+        # 6. NEW: Check for context-based sarcasm (time indicators)
+        temporal_score = self._check_temporal_sarcasm(text_lower)
+        if temporal_score > 0:
+            confidence_score += temporal_score
+            reasons.append("Timing-based sarcasm detected (again, still, always)")
+            if not sarcasm_type:
+                sarcasm_type = "temporal"
+        
+        # 7. NEW: Check for emotional escalation sarcasm
+        escalation_score = self._check_emotional_escalation(text_lower)
+        if escalation_score > 0:
+            confidence_score += escalation_score
+            reasons.append("Emotional escalation pattern detected")
+            if not sarcasm_type:
+                sarcasm_type = "escalation"
+        
+        # Normalize confidence score
+        confidence_score = min(confidence_score, 1.0)
+        
+        # Enhanced decision threshold with context awareness
+        is_sarcastic = confidence_score >= 0.4  # Lowered threshold for better detection
+        
+        # Apply highlighting if sarcasm detected (no recursion now)
+        highlighted_text = text
+        if is_sarcastic:
+            highlight_result = self.highlight_sarcastic_text(text)
+            highlighted_text = highlight_result.get('highlighted_text', text)
+        
+        return {
+            'sarcasm_detected': is_sarcastic,
+            'confidence': confidence_score,
+            'reasons': reasons,
+            'sarcasm_type': sarcasm_type,
+            'highlighted_text': highlighted_text
+        }
         
         # 4. Sentiment analysis check
         sentiment_score = self._check_sentiment_contradiction(text)
@@ -515,6 +568,63 @@ class SarcasmDetector:
         explanation += "\n**What they really mean:** The speaker is expressing the opposite of what they're literally saying - they're frustrated, not actually happy about their situation."
         
         return explanation
+    
+    def _check_repetitive_sarcasm(self, text_lower):
+        """Detect repetitive positive language that suggests sarcasm"""
+        score = 0.0
+        positive_words = ["great", "perfect", "wonderful", "amazing", "fantastic", "excellent", "brilliant", "awesome"]
+        
+        # Count how many positive words appear
+        positive_count = sum(1 for word in positive_words if word in text_lower)
+        
+        # If multiple positive words appear, likely sarcastic
+        if positive_count >= 3:
+            score += 0.4
+        elif positive_count >= 2:
+            score += 0.3
+        
+        # Check for repeated words (e.g., "great great" or "perfect, just perfect")
+        import re
+        for word in positive_words:
+            pattern = r'\b' + word + r'\b.*\b' + word + r'\b'
+            if re.search(pattern, text_lower):
+                score += 0.3
+                break
+        
+        return score
+    
+    def _check_temporal_sarcasm(self, text_lower):
+        """Detect sarcasm based on temporal indicators"""
+        score = 0.0
+        temporal_indicators = ["again", "still", "always", "every time", "once again", "yet again", "as usual"]
+        positive_words = ["great", "perfect", "wonderful", "amazing", "fantastic", "excellent", "brilliant", "awesome", "love"]
+        
+        has_temporal = any(indicator in text_lower for indicator in temporal_indicators)
+        has_positive = any(word in text_lower for word in positive_words)
+        
+        if has_temporal and has_positive:
+            score += 0.5  # Strong indicator of sarcasm
+        
+        return score
+    
+    def _check_emotional_escalation(self, text_lower):
+        """Detect emotional escalation patterns that suggest sarcasm"""
+        score = 0.0
+        
+        # Check for intensification words with positive words
+        intensifiers = ["so", "very", "really", "extremely", "absolutely", "totally", "completely"]
+        positive_words = ["great", "perfect", "wonderful", "amazing", "fantastic", "excellent", "brilliant", "awesome", "happy", "thrilled", "excited"]
+        
+        for intensifier in intensifiers:
+            for positive in positive_words:
+                if f"{intensifier} {positive}" in text_lower:
+                    # Check if there's negative context nearby
+                    negative_context = ["problem", "issue", "broken", "crashed", "failed", "error", "stuck", "trouble", "wrong", "bad"]
+                    if any(neg in text_lower for neg in negative_context):
+                        score += 0.4
+                        break
+        
+        return score
 
     def highlight_sarcastic_text(self, text):
         """
@@ -528,14 +638,8 @@ class SarcasmDetector:
                 'method': 'none'
             }
         
-        # First check if there's any sarcasm at all
-        sarcasm_result = self.detect_sarcasm(text)
-        if not sarcasm_result['sarcasm_detected']:
-            return {
-                'highlighted_text': text,
-                'sarcastic_segments': [],
-                'method': 'no_sarcasm_detected'
-            }
+        # Skip the initial detection check to avoid recursion
+        # Instead, apply rule-based highlighting directly
         
         # Try LLM-powered highlighting first
         if self.client:
@@ -737,7 +841,7 @@ Focus on identifying the specific words/phrases being used ironically or sarcast
         return None
     
     def _apply_highlighting(self, text, sarcastic_segments):
-        """Apply red highlighting to sarcastic segments"""
+        """Apply prominent red highlighting to sarcastic segments"""
         if not sarcastic_segments:
             return text
         
@@ -749,12 +853,14 @@ Focus on identifying the specific words/phrases being used ironically or sarcast
         for segment in sorted_segments:
             # Use case-insensitive search to find the segment
             import re
-            pattern = re.compile(re.escape(segment), re.IGNORECASE)
+            # Create a more flexible pattern that handles word boundaries
+            pattern = re.compile(r'\b' + re.escape(segment) + r'\b', re.IGNORECASE)
             
             def replace_func(match):
-                return f'<span style="color: red; font-weight: bold;">{match.group(0)}</span>'
+                # Enhanced red highlighting with multiple visual cues
+                return f'<span style="color: #DC3545; font-weight: bold; background-color: rgba(220, 53, 69, 0.1); padding: 2px 4px; border-radius: 3px; text-decoration: underline; text-decoration-style: wavy;">{match.group(0)}</span>'
             
-            highlighted_text = pattern.sub(replace_func, highlighted_text, count=1)
+            highlighted_text = pattern.sub(replace_func, highlighted_text)
         
         return highlighted_text
 

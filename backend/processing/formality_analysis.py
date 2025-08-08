@@ -125,9 +125,10 @@ class FormalityAnalyzer:
     
     def analyze_formality(self, text):
         """
-        Analyze the formality level of given text
-        Returns detailed formality analysis
+        Enhanced formality analysis with improved accuracy and confidence scoring
         """
+        import re  # Explicit import to fix scoping issue
+        
         if not text or not text.strip():
             return {
                 'formality_level': 'unknown',
@@ -139,7 +140,7 @@ class FormalityAnalyzer:
         text_lower = text.lower()
         word_count = len(text.split())
         
-        # Count different formality indicators
+        # Enhanced scoring system with weighted categories
         formal_score = 0
         informal_score = 0
         casual_score = 0
@@ -152,103 +153,112 @@ class FormalityAnalyzer:
             'professional': []
         }
         
-        # Check formal patterns
+        # Enhanced formal pattern detection
         for word in self.formal_patterns['academic_words']:
-            if word in text_lower:
-                formal_score += 3
+            if re.search(r'\b' + re.escape(word) + r'\b', text_lower):
+                formal_score += 4  # Higher weight for exact word matches
                 indicators['formal'].append(f"Academic word: '{word}'")
         
         for phrase in self.formal_patterns['formal_phrases']:
             if phrase in text_lower:
-                formal_score += 5
+                formal_score += 6  # Higher weight for formal phrases
                 indicators['formal'].append(f"Formal phrase: '{phrase}'")
         
         for pattern in self.formal_patterns['formal_structures']:
             if re.search(pattern, text_lower, re.IGNORECASE):
-                formal_score += 4
+                formal_score += 5  # Higher weight for formal structures
                 indicators['formal'].append(f"Formal structure detected")
         
-        for phrase in self.formal_patterns['polite_requests']:
-            if phrase in text_lower:
+        # Enhanced grammar and punctuation analysis
+        sentence_count = len([s for s in text.split('.') if s.strip()])
+        if sentence_count > 0:
+            avg_words_per_sentence = word_count / sentence_count
+            if avg_words_per_sentence > 15:  # Complex sentences indicate formality
                 formal_score += 3
-                indicators['formal'].append(f"Polite request: '{phrase}'")
+                indicators['formal'].append("Complex sentence structure")
         
-        # Check informal patterns
-        for contraction in self.informal_patterns['contractions']:
-            if contraction in text_lower:
-                informal_score += 2
-                indicators['informal'].append(f"Contraction: '{contraction}'")
+        # Check for proper capitalization
+        sentences = [s.strip() for s in text.split('.') if s.strip()]
+        proper_caps = sum(1 for s in sentences if s and s[0].isupper())
+        if sentences and proper_caps / len(sentences) > 0.8:
+            formal_score += 2
+            indicators['formal'].append("Proper capitalization")
         
-        for word in self.informal_patterns['casual_words']:
-            if word in text_lower:
-                informal_score += 2
-                indicators['informal'].append(f"Casual word: '{word}'")
+        # Enhanced informal pattern detection
+        for word in self.informal_patterns['contractions']:
+            if re.search(r'\b' + re.escape(word) + r'\b', text_lower):
+                informal_score += 3
+                indicators['informal'].append(f"Contraction: '{word}'")
         
         for phrase in self.informal_patterns['informal_phrases']:
             if phrase in text_lower:
-                informal_score += 3
+                informal_score += 4
                 indicators['informal'].append(f"Informal phrase: '{phrase}'")
         
-        for filler in self.informal_patterns['filler_words']:
-            count = len(re.findall(r'\b' + filler + r'\b', text_lower))
-            if count > 0:
-                informal_score += count * 1
-                indicators['informal'].append(f"Filler word: '{filler}' ({count}x)")
+        for word in self.informal_patterns['filler_words']:
+            if re.search(r'\b' + re.escape(word) + r'\b', text_lower):
+                informal_score += 2
+                indicators['informal'].append(f"Filler word: '{word}'")
         
-        # Check casual/slang patterns
-        for slang in self.casual_patterns['slang_words']:
-            if slang in text_lower:
-                casual_score += 3
-                indicators['casual'].append(f"Slang: '{slang}'")
+        # Enhanced casual/slang detection
+        for word in self.casual_patterns['slang_words']:
+            if re.search(r'\b' + re.escape(word) + r'\b', text_lower):
+                casual_score += 5  # High weight for slang
+                indicators['casual'].append(f"Slang: '{word}'")
         
-        for internet_slang in self.casual_patterns['internet_slang']:
-            if internet_slang in text_lower:
+        for word in self.casual_patterns['internet_slang']:
+            if re.search(r'\b' + re.escape(word) + r'\b', text_lower):
+                casual_score += 6  # Very high weight for internet slang
+                indicators['casual'].append(f"Internet slang: '{word}'")
+        
+        for word in self.casual_patterns['intensifiers']:
+            if word in text_lower:
                 casual_score += 4
-                indicators['casual'].append(f"Internet slang: '{internet_slang}'")
+                indicators['casual'].append(f"Casual intensifier: '{word}'")
         
-        for intensifier in self.casual_patterns['intensifiers']:
-            if intensifier in text_lower:
-                casual_score += 2
-                indicators['casual'].append(f"Casual intensifier: '{intensifier}'")
-        
-        # Check professional patterns
-        for term in self.professional_patterns['business_terms']:
-            if term in text_lower:
-                professional_score += 3
-                indicators['professional'].append(f"Business term: '{term}'")
+        # Enhanced professional language detection
+        for word in self.professional_patterns['business_terms']:
+            if re.search(r'\b' + re.escape(word) + r'\b', text_lower):
+                professional_score += 5
+                indicators['professional'].append(f"Business term: '{word}'")
         
         for phrase in self.professional_patterns['corporate_phrases']:
             if phrase in text_lower:
-                professional_score += 4
+                professional_score += 6
                 indicators['professional'].append(f"Corporate phrase: '{phrase}'")
         
-        # Additional indicators
-        # Check sentence structure complexity
-        sentences = re.split(r'[.!?]+', text)
-        avg_sentence_length = sum(len(s.split()) for s in sentences if s.strip()) / max(len([s for s in sentences if s.strip()]), 1)
+        # Additional analysis factors
+        # Check for excessive punctuation (indicates casualness)
+        if text.count('!') > 2 or text.count('?') > 2:
+            casual_score += 2
+            indicators['casual'].append("Excessive punctuation")
         
-        if avg_sentence_length > 20:
-            formal_score += 2
-            indicators['formal'].append(f"Complex sentences (avg {avg_sentence_length:.1f} words)")
-        elif avg_sentence_length < 8:
-            casual_score += 1
-            indicators['casual'].append(f"Short sentences (avg {avg_sentence_length:.1f} words)")
-        
-        # Check punctuation patterns
-        exclamation_count = text.count('!')
-        if exclamation_count > 2:
-            casual_score += exclamation_count
-            indicators['casual'].append(f"Multiple exclamations ({exclamation_count})")
-        
-        # Check capitalization patterns
-        if text.isupper():
+        # Check for ALL CAPS (usually casual/emotional)
+        caps_words = [word for word in text.split() if word.isupper() and len(word) > 2]
+        if len(caps_words) > 1:
             casual_score += 3
-            indicators['casual'].append("ALL CAPS usage")
-        elif any(word.isupper() for word in text.split()):
-            casual_score += 1
-            indicators['casual'].append("Some words in caps")
+            indicators['casual'].append("Multiple caps words")
         
-        # Determine formality level
+        # Check for emoji usage (casual indicator)
+        import re
+        emoji_pattern = re.compile("["
+                                 "\U0001F600-\U0001F64F"  # emoticons
+                                 "\U0001F300-\U0001F5FF"  # symbols & pictographs
+                                 "\U0001F680-\U0001F6FF"  # transport & map symbols
+                                 "\U0001F1E0-\U0001F1FF"  # flags
+                                 "]+", flags=re.UNICODE)
+        if emoji_pattern.findall(text):
+            casual_score += 3
+            indicators['casual'].append("Contains emojis")
+        
+        # Normalize scores by text length for better accuracy
+        length_factor = min(word_count / 10, 3)  # Cap the length factor
+        formal_score = formal_score * length_factor / word_count if word_count > 0 else 0
+        informal_score = informal_score * length_factor / word_count if word_count > 0 else 0
+        casual_score = casual_score * length_factor / word_count if word_count > 0 else 0
+        professional_score = professional_score * length_factor / word_count if word_count > 0 else 0
+        
+        # Enhanced decision logic with better thresholds
         scores = {
             'formal': formal_score,
             'professional': professional_score,
@@ -257,32 +267,43 @@ class FormalityAnalyzer:
         }
         
         max_score = max(scores.values())
-        total_score = sum(scores.values())
+        dominant_style = max(scores, key=scores.get)
         
-        if max_score == 0:
-            formality_level = 'neutral'
-            confidence = 0.3
+        # Improved confidence calculation
+        if max_score > 0.5:
+            confidence = min(0.7 + (max_score - 0.5) * 0.4, 0.95)
+        elif max_score > 0.2:
+            confidence = 0.5 + (max_score - 0.2) * 0.6
         else:
-            formality_level = max(scores, key=scores.get)
-            confidence = min(max_score / max(total_score, 1) * 1.2, 0.95)
+            confidence = max_score * 2.5
         
-        # Detailed breakdown
-        details = {
-            'scores': scores,
-            'total_indicators': sum(len(indicators[key]) for key in indicators),
-            'word_count': word_count,
-            'avg_sentence_length': avg_sentence_length,
-            'formality_distribution': {
-                key: round(score / max(total_score, 1) * 100, 1) 
-                for key, score in scores.items()
-            }
-        }
+        # Determine final formality level with better logic
+        if dominant_style == 'formal' and formal_score > 0.3:
+            formality_level = 'formal'
+        elif dominant_style == 'professional' and professional_score > 0.3:
+            formality_level = 'professional'
+        elif dominant_style == 'casual' and casual_score > 0.4:
+            formality_level = 'casual'
+        elif dominant_style == 'informal' and informal_score > 0.2:
+            formality_level = 'informal'
+        else:
+            formality_level = 'neutral'
+            confidence = max(confidence, 0.4)  # Minimum confidence for neutral
         
         return {
             'formality_level': formality_level,
             'confidence': confidence,
-            'details': details,
-            'indicators': indicators,
+            'details': {
+                'scores': scores,
+                'word_count': word_count,
+                'dominant_indicators': len(indicators[dominant_style]) if dominant_style in indicators else 0,
+                'formality_distribution': {
+                    key: round(score / max(sum(scores.values()), 1) * 100, 1) 
+                    for key, score in scores.items()
+                }
+            },
+            'indicators': indicators[formality_level] if formality_level in indicators else [],
+            'all_indicators': indicators,
             'summary': self._generate_formality_summary(formality_level, confidence, indicators)
         }
     

@@ -11,13 +11,13 @@ import Logo from './components/Logo';
 import LinkoLogo from './components/LinkoLogo';
 import { theme } from './theme';
 
-function Navbar() {
+function Navigation() {
   return (
     <nav style={{
-      background: 'linear-gradient(135deg, #90EE90 0%, #98FB98 100%)', // Light green gradient
+      background: 'white', // Changed to white background
       padding: '20px 0',
       boxShadow: theme.shadows.bubble,
-      borderBottom: `3px solid #32CD32`, // Lime green border
+      borderBottom: `3px solid #90EE90`, // Light green border
       borderRadius: '0 0 24px 24px'
     }}>
       <div style={{ 
@@ -47,7 +47,7 @@ function Navbar() {
           <Link 
             to="/" 
             style={{ 
-              color: 'white', // Changed to white
+              color: 'black', // Changed to black
               textDecoration: 'none', 
               fontWeight: '600',
               fontFamily: theme.typography.button.fontFamily,
@@ -55,17 +55,17 @@ function Navbar() {
               borderRadius: theme.borderRadius.bubble,
               transition: 'all 0.3s ease',
               fontSize: theme.typography.button.fontSize,
-              background: 'rgba(255,255,255,0.1)',
+              background: 'rgba(144,238,144,0.1)', // Light green background
               backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)'
+              border: '1px solid rgba(144,238,144,0.3)' // Light green border
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(255,255,255,0.25)';
+              e.target.style.background = 'rgba(144,238,144,0.25)';
               e.target.style.transform = 'translateY(-2px)';
               e.target.style.boxShadow = theme.shadows.light;
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(255,255,255,0.1)';
+              e.target.style.background = 'rgba(144,238,144,0.1)';
               e.target.style.transform = 'translateY(0)';
               e.target.style.boxShadow = 'none';
             }}
@@ -75,7 +75,7 @@ function Navbar() {
           <Link 
             to="/listen" 
             style={{ 
-              color: 'white', // Changed to white
+              color: 'black', // Changed to black
               textDecoration: 'none', 
               fontWeight: '600',
               fontFamily: theme.typography.button.fontFamily,
@@ -83,17 +83,17 @@ function Navbar() {
               borderRadius: theme.borderRadius.bubble,
               transition: 'all 0.3s ease',
               fontSize: theme.typography.button.fontSize,
-              background: 'rgba(255,255,255,0.1)',
+              background: 'rgba(144,238,144,0.1)', // Light green background
               backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)'
+              border: '1px solid rgba(144,238,144,0.3)' // Light green border
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(255,255,255,0.25)';
+              e.target.style.background = 'rgba(144,238,144,0.25)';
               e.target.style.transform = 'translateY(-2px)';
               e.target.style.boxShadow = theme.shadows.light;
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(255,255,255,0.1)';
+              e.target.style.background = 'rgba(144,238,144,0.1)';
               e.target.style.transform = 'translateY(0)';
               e.target.style.boxShadow = 'none';
             }}
@@ -103,7 +103,7 @@ function Navbar() {
           <Link 
             to="/analyze" 
             style={{ 
-              color: 'white', // Changed to white
+              color: 'black', // Changed to black
               textDecoration: 'none', 
               fontWeight: '600',
               fontFamily: theme.typography.button.fontFamily,
@@ -111,17 +111,17 @@ function Navbar() {
               borderRadius: theme.borderRadius.bubble,
               transition: 'all 0.3s ease',
               fontSize: theme.typography.button.fontSize,
-              background: 'rgba(255,255,255,0.1)',
+              background: 'rgba(144,238,144,0.1)', // Light green background
               backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)'
+              border: '1px solid rgba(144,238,144,0.3)' // Light green border
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(255,255,255,0.25)';
+              e.target.style.background = 'rgba(144,238,144,0.25)';
               e.target.style.transform = 'translateY(-2px)';
               e.target.style.boxShadow = theme.shadows.light;
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(255,255,255,0.1)';
+              e.target.style.background = 'rgba(144,238,144,0.1)';
               e.target.style.transform = 'translateY(0)';
               e.target.style.boxShadow = 'none';
             }}
@@ -131,7 +131,7 @@ function Navbar() {
           <Link 
             to="/videos" 
             style={{ 
-              color: 'white', // Changed to white
+              color: 'black', // Changed to black
               textDecoration: 'none', 
               fontWeight: '600',
               fontFamily: theme.typography.button.fontFamily,
@@ -139,17 +139,17 @@ function Navbar() {
               borderRadius: theme.borderRadius.bubble,
               transition: 'all 0.3s ease',
               fontSize: theme.typography.button.fontSize,
-              background: 'rgba(255,255,255,0.1)',
+              background: 'rgba(144,238,144,0.1)', // Light green background
               backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)'
+              border: '1px solid rgba(144,238,144,0.3)' // Light green border
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(255,255,255,0.25)';
+              e.target.style.background = 'rgba(144,238,144,0.25)';
               e.target.style.transform = 'translateY(-2px)';
               e.target.style.boxShadow = theme.shadows.light;
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(255,255,255,0.1)';
+              e.target.style.background = 'rgba(144,238,144,0.1)';
               e.target.style.transform = 'translateY(0)';
               e.target.style.boxShadow = 'none';
             }}
@@ -159,7 +159,7 @@ function Navbar() {
           <Link 
             to="/learning-library" 
             style={{ 
-              color: 'white', // Changed to white
+              color: 'black', // Changed to black
               textDecoration: 'none', 
               fontWeight: '600',
               fontFamily: theme.typography.button.fontFamily,
@@ -167,17 +167,17 @@ function Navbar() {
               borderRadius: theme.borderRadius.bubble,
               transition: 'all 0.3s ease',
               fontSize: theme.typography.button.fontSize,
-              background: 'rgba(255,255,255,0.1)',
+              background: 'rgba(144,238,144,0.1)', // Light green background
               backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)'
+              border: '1px solid rgba(144,238,144,0.3)' // Light green border
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(255,255,255,0.25)';
+              e.target.style.background = 'rgba(144,238,144,0.25)';
               e.target.style.transform = 'translateY(-2px)';
               e.target.style.boxShadow = theme.shadows.light;
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(255,255,255,0.1)';
+              e.target.style.background = 'rgba(144,238,144,0.1)';
               e.target.style.transform = 'translateY(0)';
               e.target.style.boxShadow = 'none';
             }}
@@ -187,7 +187,7 @@ function Navbar() {
           <Link 
             to="/chat" 
             style={{ 
-              color: 'white', // Changed to white
+              color: 'black', // Changed to black
               textDecoration: 'none', 
               fontWeight: '600',
               fontFamily: theme.typography.button.fontFamily,
@@ -195,17 +195,17 @@ function Navbar() {
               borderRadius: theme.borderRadius.bubble,
               transition: 'all 0.3s ease',
               fontSize: theme.typography.button.fontSize,
-              background: 'rgba(255,255,255,0.1)',
+              background: 'rgba(144,238,144,0.1)', // Light green background
               backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)'
+              border: '1px solid rgba(144,238,144,0.3)' // Light green border
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(255,255,255,0.25)';
+              e.target.style.background = 'rgba(144,238,144,0.25)';
               e.target.style.transform = 'translateY(-2px)';
               e.target.style.boxShadow = theme.shadows.light;
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(255,255,255,0.1)';
+              e.target.style.background = 'rgba(144,238,144,0.1)';
               e.target.style.transform = 'translateY(0)';
               e.target.style.boxShadow = 'none';
             }}
@@ -256,9 +256,9 @@ function App() {
       background: theme.colors.backgroundGradient
     }}>
       <BrowserRouter>
-        <Navbar />
+        <Navigation />
         <main style={{ 
-          minHeight: 'calc(100vh - 80px)',
+          minHeight: '100vh',
           padding: theme.spacing.md
         }}>
           <Routes>
